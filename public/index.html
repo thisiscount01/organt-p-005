@@ -54,11 +54,11 @@
       <div class="intake__progress" id="intake-progress" role="list" aria-label="질문 진행"></div>
       <p class="intake__question" id="intake-question" aria-live="polite"></p>
       <label class="sr-only" for="intake-answer" id="intake-answer-label">답변 입력</label>
-      <textarea class="intake__answer" id="intake-answer" rows="2" autocomplete="off" spellcheck="false"></textarea>
+      <textarea class="intake__answer" id="intake-answer" rows="2" autocomplete="off" spellcheck="false" aria-describedby="intake-hint"></textarea>
       <div class="intake__controls">
         <button class="btn-primary" id="intake-submit" type="button">담기 <span aria-hidden="true">↵</span></button>
         <button class="btn-ghost" id="intake-skip" type="button">건너뛰기</button>
-        <span class="intake__hint" aria-hidden="true">Enter로 담기 · Shift+Enter 줄바꿈</span>
+        <span class="intake__hint" id="intake-hint">Enter로 담기 · Shift+Enter 줄바꿈 · Esc로 탐색 복귀</span>
       </div>
     </div>
 

@@ -244,6 +244,16 @@
     const tag = (t.tagName || "").toLowerCase();
     return tag === "textarea" || tag === "input" || tag === "select" || t.isContentEditable === true;
   }
+  // 스크롤 완주 시 인테이크로 커서가 자동 이동한 뒤(autofocus)에도, 아직 아무것도
+  // 타이핑하지 않은 "빈 입력칸"이면 depth-jump 키를 계속 살려둔다 — 지울 편집 내용이
+  // 없어 안전하다. 실제로 답을 타이핑하기 시작하면(비어있지 않으면) 즉시 텍스트
+  // 입력을 우선해 편집을 방해하지 않는다(isInteractive 게이트의 "타이핑 중엔
+  // 가로채지 않는다"는 취지는 유지, 포커스 트랩만 해소).
+  function isEmptyTextField(t) {
+    const tag = (t && t.tagName || "").toLowerCase();
+    if (tag === "textarea" || tag === "input") return (t.value || "").length === 0;
+    return false;
+  }
   function setupKeyboard(depthsRoot) {
     const stops = [
       ...$$(".depth-panel", depthsRoot),
@@ -270,8 +280,22 @@
 
     document.addEventListener("keydown", (e) => {
       if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
-      if (isInteractive(e.target)) return; // 텍스트 입력 중엔 가로채지 않음
+      if (e.key === "Escape" && isInteractive(e.target)) {
+        // 명시적·발견가능한 탈출: autofocus로 갇힌 포커스를 즉시 풀어
+        // depth 키보드 내비게이션 제어권을 되돌린다
+        e.preventDefault();
+        try { e.target.blur(); } catch (_) {}
+        return;
+      }
+      const inField = isInteractive(e.target);
       const k = e.key;
+      // j/k/숫자는 "문자를 만드는" 키 — 빈 입력칸이어도 답이 그 글자로 시작할 수 있으니
+      // 입력칸 안에서는(비었든 타이핑 중이든) 절대 가로채지 않는다(가로채면 첫 글자 유실).
+      const producesChar = k === "j" || k === "k" || (k >= "1" && k <= "4");
+      if (inField && producesChar) return;
+      // 문자를 만들지 않는 순수 이동 키(화살표/Home/End/PageUp/PageDown)만 "빈 입력칸"일 때
+      // 예외로 통과시켜 포커스 트랩을 풀어준다 — 실제로 타이핑 중이면(비어있지 않으면) 여전히 막는다.
+      if (inField && !isEmptyTextField(e.target)) return;
       if (k === "ArrowDown" || k === "j" || k === "PageDown") { e.preventDefault(); goto(current() + 1); }
       else if (k === "ArrowUp" || k === "k" || k === "PageUp") { e.preventDefault(); goto(current() - 1); }
       else if (k === "Home") { e.preventDefault(); goto(0); }
