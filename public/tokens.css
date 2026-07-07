@@ -1,0 +1,127 @@
+/* ============================================================================
+   DEEP DIVE PORTFOLIO — DESIGN TOKENS  (art direction single source of truth)
+   변도진 · "한 줄이 초점 잡히며 확장 → surface→bytecode→interpreter→memory"
+   소유: 디자이너(아트 디렉션)  ·  소비: 프론트엔드 · 모션 · 백엔드(빌드)
+   ----------------------------------------------------------------------------
+   모든 대비 WCAG AA 이상(대부분 AAA) — 수치는 public/style-guide.html 상단
+   라이브 대비 검사기가 실제 토큰값으로 계산해 표시한다.
+   토큰은 여기서만 정의한다. 컴포넌트/화면은 이 변수만 참조(하드코딩 색 금지).
+   ============================================================================ */
+
+:root {
+  /* ===== 1. COLOR — 터미널 다크 베이스 + 단일 액센트 ======================= */
+
+  /* 깊이별 배경: surface(가장 위/밝은 다크) → memory(가장 깊은 다크).
+     내려갈수록 어두워지며 '더 깊이 들어간다'는 감각을 색으로도 전달. */
+  --bg-surface:      #0D1117;   /* depth 0 · 표면 (= 앱 기본 배경) */
+  --bg-bytecode:     #0B0E15;   /* depth 1 · 바이트코드 */
+  --bg-interpreter:  #0A0C12;   /* depth 2 · 인터프리터 */
+  --bg-memory:       #08090D;   /* depth 3 · 메모리 (심연) */
+  --bg-app:          #0D1117;
+
+  --surface-raised:  #12161F;   /* 코드블록·유물카드 표면 */
+  --surface-sunken:  #090C11;   /* 인셋·트랙 */
+
+  /* 텍스트 (모두 AA↑, 본문·2차는 AAA) */
+  --text-primary:    #E6EDF3;   /* 본문/제목  ~16:1  AAA */
+  --text-secondary:  #9DA7B3;   /* 보조 설명  ~7.9:1 AAA */
+  --text-tertiary:   #7C8896;   /* 메타/캡션  ~5.0:1 AA  */
+
+  /* 단일 액센트 — phosphor mint(터미널 인광). 시선 착지·'살아있음'의 신호. */
+  --accent:          #5EEAD4;   /* 텍스트/아이콘/포커스  ~13:1 AAA */
+  --accent-strong:   #2BD4B4;   /* 큰 채움·버튼 배경(위에 다크 텍스트) */
+  --accent-ink:      #04120E;   /* 액센트 채움 위 텍스트 */
+  --accent-dim:      rgba(94,234,212,0.14);  /* ambient 워시/글로우 */
+  --accent-line:     rgba(94,234,212,0.32);  /* 강조 헤어라인 */
+
+  /* 구조선 */
+  --line:            #1C2230;   /* 기본 헤어라인 */
+  --line-strong:     #2A3240;
+  --focus-ring:      #5EEAD4;   /* 키보드 포커스(색만으로 구분 안 함 — 링+오프셋) */
+
+  /* 코드 신택스(절제된 6색 서브셋 · 모두 surface-raised에서 AA↑) */
+  --code-plain:      #E6EDF3;
+  --code-kw:         #C792EA;   /* 키워드 · 보라 */
+  --code-str:        #7FDB8A;   /* 문자열 · 초록 */
+  --code-num:        #F78C6C;   /* 숫자 · 코랄 */
+  --code-func:       #82AAFF;   /* 함수/이름 · 파랑 */
+  --code-comment:    #7C8896;   /* 주석 · 딤 */
+  --code-punc:       #9DA7B3;
+  --code-amber:      #F2C55C;   /* 주의/하이라이트(희소 사용) */
+
+  /* ===== 2. TYPOGRAPHY — 모노스페이스가 주인공 =========================== */
+  --font-code: "JetBrains Mono", "Nanum Gothic Coding", ui-monospace,
+               SFMono-Regular, Menlo, Consolas, monospace;
+  --font-body: "Pretendard", "Pretendard Variable", -apple-system,
+               system-ui, "Apple SD Gothic Neo", sans-serif;
+
+  /* 타입 스케일 (모노 기준 모듈러) */
+  --fs-hero:     clamp(2.2rem, 7.5vw, 5.25rem);  /* 단 한 줄(surface focal) */
+  --fs-display:  clamp(1.75rem, 4.5vw, 3rem);    /* 깊이 타이틀 focal */
+  --fs-h1:       clamp(1.5rem, 3vw, 2.25rem);
+  --fs-h2:       1.5rem;
+  --fs-h3:       1.2rem;
+  --fs-body:     1.0625rem;   /* 17px */
+  --fs-code:     0.95rem;
+  --fs-caption:  0.8125rem;
+  --fs-micro:    0.72rem;     /* 깊이 태그/라벨 */
+
+  --lh-tight: 1.14;
+  --lh-snug:  1.35;
+  --lh-body:  1.72;
+  --lh-code:  1.55;
+
+  --ls-tight: -0.02em;
+  --ls-normal: 0;
+  --ls-wide:  0.14em;         /* 마이크로 라벨(대문자성) */
+
+  --fw-regular: 400;
+  --fw-medium:  500;
+  --fw-bold:    700;
+
+  /* ===== 3. SPACING — 8px 베이스라인 ==================================== */
+  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px; --sp-5: 24px;
+  --sp-6: 32px; --sp-7: 48px; --sp-8: 64px; --sp-9: 96px; --sp-10: 128px;
+  --sp-11: 192px;
+
+  /* 레이아웃 그리드 */
+  --measure:   68ch;                       /* 산문 최대 폭(가독성) */
+  --stage-max: 1200px;                     /* 콘텐츠 프레임 최대 폭 */
+  --gutter:    clamp(20px, 5vw, 80px);     /* 좌우 여백(여백이 곧 awe) */
+  --grid-cols: 12;
+  --grid-gap:  clamp(16px, 2vw, 32px);
+
+  --radius-sm: 4px; --radius: 8px; --radius-lg: 14px; --radius-pill: 999px;
+
+  /* 엘리베이션(다크에선 절제) */
+  --shadow-card: 0 1px 0 rgba(255,255,255,0.03) inset, 0 8px 30px rgba(0,0,0,0.45);
+  --glow-accent: 0 0 0 1px var(--accent-line), 0 0 26px rgba(94,234,212,0.16);
+
+  /* ===== 4. MOTION — 디자인 값 (타이밍 '계약'은 프론트/모션 소유) ========= */
+  /* 여기 값은 '손맛'의 vocabulary. 실제 스크롤 진행도 0~1 방출/소비 계약은
+     프론트(방출)·모션(소비)이 소유한다. 디자인은 이징/지속시간만 규정. */
+  --ease-focus:  cubic-bezier(0.22, 0.61, 0.36, 1);  /* 초점 잡힘(ease-out) */
+  --ease-depth:  cubic-bezier(0.65, 0, 0.35, 1);     /* 깊이 전환(in-out) */
+  --ease-emerge: cubic-bezier(0.16, 1, 0.3, 1);      /* 유물 등장 */
+  --dur-micro: 120ms;  --dur-quick: 220ms;
+  --dur-focus: 420ms;  --dur-depth: 640ms;
+  --stagger:   70ms;                                 /* 순차 등장 간격 */
+  --blur-far:  6px;    /* 아직 초점 안 맞은 유물 */
+  --blur-near: 0px;
+
+  /* ===== 5. EMPHASIS — 강조등급 = 시각 위계 토큰 ========================= */
+  /* focal 1개/뷰 · support ≤2 · ambient(배경 텍스처, 강조 카운트 제외).
+     => 첫 화면 '카운트되는 블록' ≤3, 동급 강조 0. */
+  --z-ambient: 0; --z-support: 10; --z-focal: 20; --z-nav: 80; --z-overlay: 100;
+}
+
+/* 저사양·모션 민감 사용자: 모션 제거 ≠ 전환 제거.
+   깊이 변화는 사라지지 않고 120ms 크로스페이드로만 전달(서사 손실 0). */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-micro: 0ms; --dur-quick: 0ms; --dur-focus: 0ms;
+    --dur-depth: 120ms;         /* 순간이동 금지: 최소 크로스페이드 유지 */
+    --stagger: 0ms;
+    --blur-far: 0px;            /* 블러 대신 즉시 선명 */
+  }
+}

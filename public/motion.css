@@ -1,0 +1,244 @@
+/* ============================================================================
+   MOTION SYSTEM — 딥다이브 포트폴리오 시그니처 모션 (owner: 모션 애니메이터)
+   ----------------------------------------------------------------------------
+   철학: 모션은 장식이 아니라 '표면에서 심연으로 내려간다'는 은유를 몸으로 말한다.
+     surface   → 히어로: print 한 줄이 터미널처럼 켜지며 초점이 잡힌다(3초 감탄).
+     bytecode  → 분해(decompose): 한 줄이 명령들로 흩어졌다 정렬된다.
+     interpreter → 뒤집힘(invert): 스택 프레임이 회전하며 실행이 뒤집혀 드러난다.
+     memory    → 침강(sink): 객체가 중력으로 가라앉아 바닥에 자리 잡는다.
+     coda      → 응결(condense): 풀렸던 것이 다시 한 줄로 모여 굳는다.
+
+   소비 계약(프론트가 방출 = 단일 소스, 모션은 소비만):
+     · .reveal.is-in           — IntersectionObserver가 붙이는 진입 트리거(app.js)
+     · [data-depth="…"]        — 깊이 판정(.depth-panel / body)
+     · --scroll-progress 0..1  — 스크롤 진행도(연속 하강 압력)
+     · 유물 클래스(artifacts.css): .a-code-line .a-bytecode .ins .a-callstack
+       .frame .a-memcell #coda-headline — 이 위에 시그니처를 얹는다.
+
+   성능 규율: transform / opacity / filter(blur) / clip-path 만 애니메이트
+     (width·height·top·left·margin 등 레이아웃 유발 속성 0 → 레이아웃 스래싱 0).
+   접근성: 모든 시그니처는 @media (prefers-reduced-motion: no-preference) 안에서만
+     활성 → reduce 사용자는 움직임 0, 정보/서사 손실 0(깊이는 배경·data-depth·
+     aria-live로 그대로 전달). '움직임만 죽고 깊이는 산다'.
+
+   ▶ 플랫폼 이식: 이 파일 하나 + 아래 [모션 토큰]만 다른 포폴에 드롭하면 동일 손맛.
+     시그니처 진폭은 여기 :root 토큰만 조율하면 재사용된다(HTML/JS 변경 불필요).
+   ============================================================================ */
+
+/* ── [모션 토큰] 재사용 프리셋 (motion 도메인 소유) ─────────────────────────
+   디자이너의 tokens.css는 spacing/color를 소유. 여기 값은 타이밍·이징·시퀀스·
+   시그니처 진폭 = 모션 도메인 소유(§4 MOTION 계약: 프론트/모션). tokens.css의
+   --ease-focus/--dur-focus/--stagger/--blur-* 등은 그대로 소비하고, 아래는 확장. */
+:root {
+  /* 이징 vocabulary — 물리적으로 정직(등속 금지, 진입·이탈 감속) */
+  --ease-decompose: cubic-bezier(0.2, 0.8, 0.2, 1);   /* 분해: 흩어졌다 정렬 */
+  --ease-invert:    cubic-bezier(0.5, 0, 0.15, 1);    /* 뒤집힘: 회전 진입 */
+  --ease-gravity:   cubic-bezier(0.28, 1.4, 0.5, 1);  /* 침강: 중력+정착 오버슛 */
+  --ease-condense:  cubic-bezier(0.7, 0, 0.2, 1);     /* 응결: 모여서 굳음 */
+
+  /* 지속시간 scale — 이동거리·의미에 비례 */
+  --dur-signature: 720ms;   /* 깊이 시그니처(분해/뒤집힘/침강) */
+  --dur-hero:      1100ms;  /* 히어로 부트(표면 첫 화면) */
+
+  /* 시퀀스 리듬 */
+  --sig-stagger:   85ms;    /* 시그니처 행/프레임 간 지연 */
+
+  /* 시그니처 진폭 — 각 깊이 아이디어를 '몸'으로 말하는 크기(이식 시 이 값만 조율) */
+  --sig-decompose-rise: 26px;   /* 분해: 명령이 흩어져 내려오는 거리 */
+  --sig-decompose-skew: 9px;    /* 분해: 좌우 흩어짐 진폭 */
+  --sig-invert-deg:     18deg;  /* 뒤집힘: 프레임 rotateX 진입각 */
+  --sig-invert-persp:   720px;  /* 뒤집힘: 원근 깊이 */
+  --sig-sink-rise:      30px;   /* 침강: 객체가 위에서 가라앉는 거리 */
+  --sig-sink-scale:     0.94;   /* 침강: 착지 전 축소 */
+  --sig-condense-scale: 1.05;   /* 응결: 풀렸다 굳는 스케일 */
+  --sig-drift:          7px;    /* 연속 하강: focal 시차(view-timeline) */
+  --veil-max:           0.30;   /* 하강 압력 베일 최대 불투명도 */
+}
+
+/* ============================================================================
+   [키프레임 라이브러리] — 재사용 가능(compositor-only: transform/opacity/filter/clip)
+   ============================================================================ */
+
+/* 히어로: 터미널 전원이 켜지듯 신호가 잡힌다(플리커 → 안정). opacity만. */
+@keyframes sig-boot {
+  0%   { opacity: 0; }
+  7%   { opacity: 0.55; }
+  11%  { opacity: 0.12; }
+  19%  { opacity: 0.85; }
+  25%  { opacity: 0.30; }
+  34%  { opacity: 1; }
+  46%  { opacity: 0.72; }
+  100% { opacity: 1; }
+}
+/* 히어로: 초점이 맞으며 살짝 밀려 안착(스케일 정착). transform만. */
+@keyframes sig-settle {
+  from { transform: scale(1.028); }
+  to   { transform: scale(1); }
+}
+
+/* 분해: 한 줄이 명령으로 흩어졌다(위+좌우) 제자리로 정렬. transform/opacity. */
+@keyframes sig-decompose {
+  from {
+    opacity: 0;
+    transform: translate3d(calc(var(--dir, 1) * var(--sig-decompose-skew)),
+                           calc(-1 * var(--sig-decompose-rise)), 0);
+  }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+/* 뒤집힘: 프레임이 원근 속에서 회전하며 진입(실행이 뒤집혀 드러남). transform/opacity. */
+@keyframes sig-invert {
+  from {
+    opacity: 0;
+    transform: perspective(var(--sig-invert-persp))
+               rotateX(var(--sig-invert-deg)) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: perspective(var(--sig-invert-persp)) rotateX(0deg) translateY(0);
+  }
+}
+
+/* 침강: 객체가 위에서 중력으로 가라앉아 오버슛 뒤 정착. transform/opacity(ease-gravity). */
+@keyframes sig-sink {
+  0%   { opacity: 0; transform: translateY(calc(-1 * var(--sig-sink-rise))) scale(var(--sig-sink-scale)); }
+  60%  { opacity: 1; }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* 응결: 풀렸던 것이 다시 굳는다(스케일 수렴). transform/opacity. */
+@keyframes sig-condense {
+  from { opacity: 0; transform: scale(var(--sig-condense-scale)); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* 실행 루프 심장박동: 인터프리터의 '현재 프레임'이 살아 도는 신호. opacity(글로우). */
+@keyframes sig-loop {
+  0%, 100% { opacity: 0; }
+  50%      { opacity: 1; }
+}
+
+/* CALL 명령 강조: 분해 정착 뒤 한 번 맥동 후 은은한 상시 글로우로 정착. opacity. */
+@keyframes sig-accent-pulse {
+  0%   { opacity: 0; }
+  45%  { opacity: 1; }
+  100% { opacity: 0.5; }
+}
+
+/* 연속 하강 시차: 패널이 뷰포트를 통과하는 동안 focal이 아주 미세하게 떠내려감. */
+@keyframes sig-drift {
+  from { transform: translateY(calc(-1 * var(--sig-drift))); }
+  to   { transform: translateY(var(--sig-drift)); }
+}
+
+/* ============================================================================
+   [시그니처 적용] — reduce 사용자에겐 절대 적용되지 않도록 no-preference 게이트.
+     · 진입 트리거 = .depth-focal.reveal.is-in (프론트 IO가 부착)
+     · 시그니처는 focal '내부 유물'에 얹혀, 부모 focal의 focus-resolve(blur→sharp,
+       app.css .reveal)와 겹쳐 '해상도가 올라가며 분해/뒤집힘/침강'을 만든다.
+   ============================================================================ */
+@media (prefers-reduced-motion: no-preference) {
+
+  /* ── surface · 히어로 focus-resolve: print 한 줄이 켜지며 안착 ──────────── */
+  [data-depth="surface"] .depth-focal.reveal.is-in .a-code-line {
+    animation:
+      sig-boot   var(--dur-hero)   linear            both,
+      sig-settle var(--dur-focus)  var(--ease-focus) both;
+  }
+
+  /* ── bytecode · 분해: 명령들이 흩어졌다 순차 정렬(위→아래 stagger) ──────── */
+  [data-depth="bytecode"] .depth-focal.reveal.is-in .a-bytecode .ins {
+    animation: sig-decompose var(--dur-signature) var(--ease-decompose) both;
+  }
+  /* 좌우 교차 흩어짐 + 행 순차 지연(6행 기준, 8행까지 안전) */
+  [data-depth="bytecode"] .a-bytecode .ins:nth-child(odd)  { --dir: -1; }
+  [data-depth="bytecode"] .a-bytecode .ins:nth-child(even) { --dir:  1; }
+  [data-depth="bytecode"] .depth-focal.reveal.is-in .a-bytecode .ins:nth-child(1) { animation-delay: 0ms; }
+  [data-depth="bytecode"] .depth-focal.reveal.is-in .a-bytecode .ins:nth-child(2) { animation-delay: calc(var(--sig-stagger) * 1); }
+  [data-depth="bytecode"] .depth-focal.reveal.is-in .a-bytecode .ins:nth-child(3) { animation-delay: calc(var(--sig-stagger) * 2); }
+  [data-depth="bytecode"] .depth-focal.reveal.is-in .a-bytecode .ins:nth-child(4) { animation-delay: calc(var(--sig-stagger) * 3); }
+  [data-depth="bytecode"] .depth-focal.reveal.is-in .a-bytecode .ins:nth-child(5) { animation-delay: calc(var(--sig-stagger) * 4); }
+  [data-depth="bytecode"] .depth-focal.reveal.is-in .a-bytecode .ins:nth-child(6) { animation-delay: calc(var(--sig-stagger) * 5); }
+  [data-depth="bytecode"] .depth-focal.reveal.is-in .a-bytecode .ins:nth-child(7) { animation-delay: calc(var(--sig-stagger) * 6); }
+  [data-depth="bytecode"] .depth-focal.reveal.is-in .a-bytecode .ins:nth-child(8) { animation-delay: calc(var(--sig-stagger) * 7); }
+  /* CALL(호출) 행: 분해가 끝난 뒤 강조 맥동(호출이 일어나는 지점을 눈으로).
+     행 위에 얹는 글로우 링(정적 box-shadow) + opacity만 맥동 → 텍스트 가림 0. */
+  [data-depth="bytecode"] .a-bytecode .ins.is-focus { position: relative; }
+  [data-depth="bytecode"] .a-bytecode .ins.is-focus::before {
+    content: ""; position: absolute; inset: -2px; z-index: 1;
+    border-radius: var(--radius-sm); pointer-events: none; opacity: 0;
+    box-shadow: 0 0 0 1px var(--accent-line), 0 0 18px rgba(94, 234, 212, 0.35);
+  }
+  [data-depth="bytecode"] .depth-focal.reveal.is-in .a-bytecode .ins.is-focus::before {
+    animation: sig-accent-pulse 900ms var(--ease-emerge) both;
+    animation-delay: calc(var(--sig-stagger) * 6 + var(--dur-signature) * 0.4);
+  }
+
+  /* ── interpreter · 뒤집힘: 스택 프레임이 회전하며 진입(순차) ────────────── */
+  [data-depth="interpreter"] .depth-focal.reveal.is-in .a-callstack .frame {
+    transform-style: preserve-3d;
+    animation: sig-invert var(--dur-signature) var(--ease-invert) both;
+  }
+  [data-depth="interpreter"] .depth-focal.reveal.is-in .a-callstack .frame:nth-child(1) { animation-delay: 0ms; }
+  [data-depth="interpreter"] .depth-focal.reveal.is-in .a-callstack .frame:nth-child(2) { animation-delay: calc(var(--sig-stagger) * 1.6); }
+  [data-depth="interpreter"] .depth-focal.reveal.is-in .a-callstack .frame:nth-child(3) { animation-delay: calc(var(--sig-stagger) * 3.2); }
+  [data-depth="interpreter"] .depth-focal.reveal.is-in .a-callstack .frame:nth-child(4) { animation-delay: calc(var(--sig-stagger) * 4.8); }
+  [data-depth="interpreter"] .depth-focal.reveal.is-in .a-callstack .frame:nth-child(5) { animation-delay: calc(var(--sig-stagger) * 6.4); }
+  /* 현재 프레임 = 실행 루프가 도는 자리 → 은은한 심장박동 글로우(살아있음) */
+  [data-depth="interpreter"] .a-callstack .frame.is-current { position: relative; }
+  [data-depth="interpreter"] .a-callstack .frame.is-current::after {
+    content: ""; position: absolute; inset: -1px; border-radius: inherit;
+    box-shadow: var(--glow-accent); pointer-events: none; opacity: 0;
+  }
+  [data-depth="interpreter"] .depth-focal.reveal.is-in .a-callstack .frame.is-current::after {
+    animation: sig-loop 2.4s ease-in-out infinite;
+    animation-delay: calc(var(--sig-stagger) * 3.2 + var(--dur-signature));
+  }
+
+  /* ── memory · 침강: 객체가 위에서 가라앉아 오버슛 뒤 정착 ────────────────── */
+  [data-depth="memory"] .depth-focal.reveal.is-in .a-memgrid .a-memcell {
+    animation: sig-sink var(--dur-signature) var(--ease-gravity) both;
+  }
+  [data-depth="memory"] .depth-focal.reveal.is-in .a-memgrid .a-memcell:nth-child(2) { animation-delay: calc(var(--sig-stagger) * 1.5); }
+  [data-depth="memory"] .depth-focal.reveal.is-in .a-memgrid .a-memcell:nth-child(3) { animation-delay: calc(var(--sig-stagger) * 3); }
+  [data-depth="memory"] .depth-focal.reveal.is-in .a-memgrid .a-memcell:nth-child(4) { animation-delay: calc(var(--sig-stagger) * 4.5); }
+
+  /* ── coda · 응결: 헤드라인이 다시 한 줄로 모여 굳는다 ───────────────────── */
+  #coda-headline.reveal.is-in {
+    animation: sig-condense var(--dur-depth) var(--ease-condense) both;
+  }
+
+  /* ── 연속 하강(progressive enhancement): 패널 통과 시 focal 미세 시차 ─────
+     스크롤 타임라인 미지원 브라우저는 무시(정적) — 기본 서사에 영향 0. */
+  @supports (animation-timeline: view()) {
+    .depth-panel .depth-focal {
+      animation: sig-drift linear both;
+      animation-timeline: view();
+      animation-range: entry 10% exit 90%;
+    }
+  }
+}
+
+/* ── 하강 압력 베일: 스크롤 진행도에 따라 화면 가장자리가 조여든다(연속) ──────
+   깊이가 깊어질수록 '압력'이 커지는 감각. content 위 얇은 vignette(터치 불가).
+   opacity만 --scroll-progress에 종속(자율 애니메이션 아님 → 스크롤 위치의 함수).
+   순수 CSS body::after — DOM 추가 불필요. z=60: 불투명 패널 콘텐츠(z≤20) 위,
+   내비/진행바(z-nav 80) 아래 → 코너 vignette만 미세하게 조이고 UI는 선명 유지. */
+body::after {
+  content: ""; position: fixed; inset: 0; z-index: 60;
+  pointer-events: none;
+  background: radial-gradient(130% 100% at 50% 50%,
+              transparent 52%, rgba(0, 0, 0, 0.9) 130%);
+  opacity: calc(var(--scroll-progress, 0) * var(--veil-max));
+  will-change: opacity;
+}
+
+/* ============================================================================
+   [reduced-motion 등가성] — 움직임만 죽이고 깊이·정보·서사는 100% 유지.
+   시그니처는 no-preference 게이트라 자동 비활성이므로 여기선 '항상 도는' 것만 정지.
+   (캐럿 blink·연속 베일 — 스크롤·자율 모션 제거). 요소는 전부 자연 표시 상태.
+   ============================================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .cursor { animation: none; opacity: 1; }
+  body::after { opacity: 0; }
+}

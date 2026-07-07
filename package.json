@@ -1,0 +1,13 @@
+{
+  "name": "deepdive-portfolio-byundojin",
+  "version": "0.1.0",
+  "private": true,
+  "description": "딥다이브 포트폴리오 — 변도진 (surface→bytecode→interpreter→memory) + 딥다이브 인테이크",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

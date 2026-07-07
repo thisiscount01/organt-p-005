@@ -1,0 +1,311 @@
+/* ============================================================================
+   ARTIFACTS & DEPTH STAGE — 재사용 컴포넌트 클래스
+   depth-schema.json의 artifactType/emphasisGrade를 그대로 클래스로 구현.
+   프론트는 이 클래스를 재사용(재도출 불필요). tokens.css 선행 로드 필요.
+   '한 인물 = 사고의 유물' — 얼굴 사진 대신 커밋·슬라이드·풀이·메모리로 표현.
+   ============================================================================ */
+
+/* ---- 강조등급(시각 위계) ---------------------------------------------- */
+.emph-focal   { position: relative; z-index: var(--z-focal); }
+.emph-support { position: relative; z-index: var(--z-support); color: var(--text-secondary); }
+.emph-ambient {
+  position: absolute; z-index: var(--z-ambient); inset: 0; pointer-events: none;
+  color: var(--text-tertiary); opacity: 0.5; overflow: hidden;
+}
+
+/* ---- 깊이 무대(sticky stage 안에 놓이는 콘텐츠 프레임) ------------------ */
+.depth-stage {
+  position: relative;
+  max-width: var(--stage-max);
+  margin-inline: auto;
+  padding: var(--sp-9) var(--gutter);
+  min-height: 100svh;
+  display: grid;
+  align-content: center;
+  gap: var(--sp-5);
+}
+.depth-microlabel {
+  font-family: var(--font-code);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  color: var(--accent);
+  display: inline-flex; align-items: center; gap: var(--sp-2);
+}
+.depth-microlabel::before {
+  content: ""; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent); box-shadow: var(--glow-accent);
+}
+.depth-tagline {
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  color: var(--text-secondary);
+  max-width: var(--measure);
+}
+
+/* ---- 공통 유물 프레임 ------------------------------------------------- */
+.artifact {
+  font-family: var(--font-code);
+  background: var(--surface-raised);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+.artifact__chrome {                 /* 터미널/창 크롬 바 */
+  display: flex; align-items: center; gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-4);
+  border-bottom: 1px solid var(--line);
+  font-size: var(--fs-caption); color: var(--text-tertiary);
+}
+.artifact__chrome::before {
+  content: ""; width: 8px; height: 8px; border-radius: 50%;
+  background: var(--line-strong);
+  box-shadow: 14px 0 var(--line-strong), 28px 0 var(--line-strong);
+  margin-right: 22px;
+}
+.artifact__body { padding: var(--sp-4) var(--sp-5); }
+.artifact__caption {
+  font-family: var(--font-body); font-size: var(--fs-caption);
+  color: var(--text-tertiary); margin-top: var(--sp-3);
+}
+
+/* ---- code-line (surface focal) --------------------------------------- */
+.a-code-line {
+  font-family: var(--font-code);
+  font-size: var(--fs-hero);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-tight);
+  color: var(--code-plain);
+}
+.tok-kw   { color: var(--code-kw); }
+.tok-str  { color: var(--code-str); }
+.tok-num  { color: var(--code-num); }
+.tok-func { color: var(--code-func); }
+.tok-com  { color: var(--code-comment); }
+.tok-punc { color: var(--code-punc); }
+.cursor {
+  display: inline-block; width: 0.6ch; height: 1.05em;
+  background: var(--accent); vertical-align: -0.12em; margin-left: 2px;
+  animation: blink 1.1s steps(1) infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+/* ---- bytecode-dump --------------------------------------------------- */
+.a-bytecode { font-size: var(--fs-code); line-height: var(--lh-code); }
+.a-bytecode .ins { display: grid; grid-template-columns: 4ch 22ch 1fr; gap: var(--sp-3); }
+.a-bytecode .ins .off  { color: var(--text-tertiary); text-align: right; }
+.a-bytecode .ins .op   { color: var(--code-kw); }
+.a-bytecode .ins .arg  { color: var(--code-plain); }
+.a-bytecode .ins.is-focus { background: var(--accent-dim); border-left: 2px solid var(--accent); }
+
+/* ---- call-stack ------------------------------------------------------ */
+.a-callstack { display: grid; gap: var(--sp-2); font-size: var(--fs-code); }
+.a-callstack .frame {
+  padding: var(--sp-3) var(--sp-4); border: 1px solid var(--line);
+  border-radius: var(--radius-sm); background: var(--surface-sunken);
+  color: var(--text-secondary);
+}
+.a-callstack .frame .fn { color: var(--code-func); }
+.a-callstack .frame.is-current { border-color: var(--accent-line); color: var(--text-primary); }
+
+/* ---- memory-cell ----------------------------------------------------- */
+.a-memgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px,1fr)); gap: var(--sp-3); }
+.a-memcell {
+  border: 1px solid var(--line); border-radius: var(--radius-sm);
+  padding: var(--sp-3) var(--sp-4); background: var(--surface-raised);
+  font-size: var(--fs-code);
+}
+.a-memcell .label { color: var(--text-tertiary); font-size: var(--fs-caption); }
+.a-memcell .value { color: var(--code-plain); }
+.a-memcell .refcount {
+  display: inline-block; margin-top: var(--sp-2); padding: 1px var(--sp-2);
+  border-radius: var(--radius-pill); font-size: var(--fs-caption);
+  color: var(--code-amber); border: 1px solid rgba(242,197,92,0.35);
+}
+
+/* ---- commit ---------------------------------------------------------- */
+.a-commit { font-size: var(--fs-code); display: flex; gap: var(--sp-3); align-items: baseline; }
+.a-commit .dot { color: var(--accent); }
+.a-commit .hash { color: var(--code-amber); }
+.a-commit .subject { color: var(--text-primary); }
+.a-commit .repo { color: var(--text-tertiary); }
+
+/* ---- slide (얼굴 사진 대체 유물) ------------------------------------- */
+.a-slide {
+  position: relative; aspect-ratio: 16/9; border: 1px solid var(--line);
+  border-radius: var(--radius); background:
+    radial-gradient(120% 120% at 20% 10%, rgba(94,234,212,0.08), transparent 55%),
+    var(--surface-raised);
+  padding: var(--sp-5); display: grid; align-content: end; gap: var(--sp-2);
+  overflow: hidden;
+}
+.a-slide .event { font-size: var(--fs-micro); letter-spacing: var(--ls-wide);
+  text-transform: uppercase; color: var(--accent); }
+.a-slide .title { font-size: var(--fs-h3); color: var(--text-primary); line-height: var(--lh-snug); }
+.a-slide .role  { font-size: var(--fs-caption); color: var(--text-tertiary); }
+
+/* ---- trace (성취/풀이 흔적) ------------------------------------------ */
+.a-trace { display: grid; gap: var(--sp-1); }
+.a-trace .label { font-size: var(--fs-caption); color: var(--text-tertiary); font-family: var(--font-body); }
+.a-trace .value { font-family: var(--font-code); font-size: var(--fs-h2); color: var(--accent); }
+.a-trace .detail { font-size: var(--fs-caption); color: var(--text-secondary); font-family: var(--font-body); }
+
+/* ---- spec-badge / link-out ------------------------------------------ */
+.a-badge {
+  display: inline-flex; gap: var(--sp-2); align-items: center;
+  padding: var(--sp-1) var(--sp-3); border: 1px solid var(--line);
+  border-radius: var(--radius-pill); font-family: var(--font-code);
+  font-size: var(--fs-caption); color: var(--text-secondary);
+}
+.a-link { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-line); }
+.a-link:hover { border-bottom-color: var(--accent); }
+.a-link::after { content: " ↗"; }
+
+/* ---- prose ----------------------------------------------------------- */
+.a-prose { font-family: var(--font-body); font-size: var(--fs-body);
+  line-height: var(--lh-body); color: var(--text-primary); max-width: var(--measure); }
+
+/* ---- 코다 CTA / 버튼 ------------------------------------------------- */
+.btn-primary {
+  font-family: var(--font-code); font-size: var(--fs-body); font-weight: var(--fw-medium);
+  padding: var(--sp-3) var(--sp-6); border-radius: var(--radius);
+  background: var(--accent-strong); color: var(--accent-ink); border: 0; cursor: pointer;
+  transition: filter var(--dur-quick) var(--ease-focus), transform var(--dur-quick) var(--ease-focus);
+}
+.btn-primary:hover { filter: brightness(1.08); }
+.btn-primary:active { transform: translateY(1px); }
+
+/* ---- 우측 미세 깊이 눈금(현재만 점등, 포커스 시 라벨 확장) ------------- */
+.depth-rail { position: fixed; right: var(--sp-4); top: 50%; transform: translateY(-50%);
+  z-index: var(--z-nav); display: grid; gap: var(--sp-3); }
+.depth-rail a { display: flex; align-items: center; gap: var(--sp-3);
+  text-decoration: none; color: var(--text-tertiary); font-family: var(--font-code);
+  font-size: var(--fs-micro); }
+.depth-rail a .tick { width: 22px; height: 2px; background: var(--line-strong);
+  transition: background var(--dur-quick), width var(--dur-quick); }
+.depth-rail a .name { opacity: 0; transform: translateX(6px);
+  transition: opacity var(--dur-quick), transform var(--dur-quick); }
+.depth-rail a[aria-current="true"] .tick { background: var(--accent); width: 30px; }
+.depth-rail a[aria-current="true"] { color: var(--accent); }
+.depth-rail:hover a .name, .depth-rail a:focus-visible .name { opacity: 1; transform: none; }
+
+/* ---- 접근성: 포커스 링(색만으로 구분 안 함) --------------------------- */
+:where(a, button, [tabindex]):focus-visible {
+  outline: 2px solid var(--focus-ring); outline-offset: 3px; border-radius: var(--radius-sm);
+}
+
+/* ============================================================================
+   DESIGNER CRAFT PASS — 아트 디렉션(정지 구도) 층
+   '내려갈수록 깊어진다'를 배치·위계·리듬으로 말하게 한다. 색/타이포는 토큰만.
+   모션(app.js·motion.css)·콘텐츠(content.json)는 건드리지 않는다.
+   ----------------------------------------------------------------------------
+   ① 깊이 인덱스 고스트: '몇 번째 층까지 내려왔나'를 공간으로(느껴지는 배경)
+   ② support prose = '코드 주석' 티어: 포컬 아래 텍스트 위계를 확실히 낮춤
+   ③ 깊이 레일 = '깊이 게이지'(세로 축선): 원탭 점프 대상이 눈금자로 읽힘
+   ============================================================================ */
+
+/* ── ① 깊이 인덱스 고스트 유물 (ambient · 강조 카운트 제외) ─────────────────
+   거대한 깊이 번호가 무대 뒤에 잠겨 있고, 내려갈수록 커지고 짙어진다.
+   content 의 '/ ""' 로 스크린리더에는 빈 문자열(장식) — 시각에만 존재. */
+.depth-stage { overflow: clip; isolation: isolate; }
+/* 실제 콘텐츠(라벨·포컬·태그라인·증거)는 고스트 위 레이어로 — 텍스트를 절대 가리지 않음 */
+.depth-stage > * { position: relative; z-index: 1; }
+.depth-panel[data-depth] .depth-stage::before {
+  position: absolute; z-index: var(--z-ambient);
+  top: clamp(var(--sp-5), 8vh, var(--sp-9));
+  right: calc(-0.02 * var(--stage-max));
+  font-family: var(--font-code); font-weight: var(--fw-bold);
+  line-height: 0.78; letter-spacing: -0.05em;
+  color: var(--text-primary);
+  pointer-events: none; user-select: none;
+}
+/* 0-인덱스 = CPython 딥다이버의 모국어(배열은 0에서 시작). 표면=진입점 00.
+   마이크로라벨(00·SURFACE …)·depth-schema 와 동일 인덱스로 통일 — 고스트가 유일한 1-인덱스 이탈이었다. */
+.depth-panel[data-depth="surface"]     .depth-stage::before { content: "00" / ""; font-size: clamp(6rem, 22vw, 15rem); opacity: 0.030; }
+.depth-panel[data-depth="bytecode"]    .depth-stage::before { content: "01" / ""; font-size: clamp(7rem, 24vw, 17rem); opacity: 0.042; }
+.depth-panel[data-depth="interpreter"] .depth-stage::before { content: "02" / ""; font-size: clamp(8rem, 26vw, 19rem); opacity: 0.055; }
+.depth-panel[data-depth="memory"]      .depth-stage::before { content: "03" / ""; font-size: clamp(9rem, 28vw, 21rem); opacity: 0.075; }
+
+/* ── ② support prose = 개발자의 여백 주석 티어 ─────────────────────────────
+   포컬(한 줄/유물) 아래의 산문을 '# 주석'으로 낮춰, 시선이 포컬→내레이션(태그
+   라인)→증거(칩)→주석 순의 단일 경로로 흐르게 한다(동급 강조 제거). */
+.depth-support .a-prose {
+  font-family: var(--font-code);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-code);
+  color: var(--text-tertiary);
+  max-width: var(--measure);
+  position: relative;
+  padding-left: 1.7em;
+}
+.depth-support .a-prose::before {
+  content: "#"; position: absolute; left: 0; top: 0;
+  color: var(--accent); opacity: 0.55;
+  font-family: var(--font-code);
+}
+.depth-support .a-prose strong { color: var(--text-secondary); font-weight: var(--fw-medium); }
+
+/* 태그라인 = 내레이션 티어: 포컬 바로 아래, 증거/주석보다 한 단계 위.
+   왼쪽 헤어라인으로 '이 사람의 목소리'임을 표식(포컬과 구분, 주석과도 구분). */
+.depth-tagline {
+  padding-left: var(--sp-4);
+  border-left: 2px solid var(--accent-line);
+  color: var(--text-secondary);
+}
+
+/* ── ③ 깊이 레일 = 깊이 게이지 ────────────────────────────────────────────
+   눈금 뒤로 세로 축선을 깔아 '표면→심연'의 자(ruler)처럼 읽히게 한다.
+   현재 깊이 눈금만 점등 → 어디까지 내려왔는지 한눈에(원탭 점프 대상). */
+#depth-rail { position: fixed; }
+#depth-rail::before {
+  content: ""; position: absolute;
+  right: 10px; top: -2px; bottom: -2px; width: 1px;
+  background: linear-gradient(to bottom,
+    transparent, var(--line) 12%, var(--line-strong) 50%, var(--line) 88%, transparent);
+  z-index: -1; pointer-events: none;
+}
+
+/* ── ④ 하강의 리듬: 내려갈수록 텍스트 열이 좁아진다(압력·수렴의 감각) ──────
+   surface(가장 넓음) → memory(가장 좁음). 배치만으로 '더 깊이 들어간다'. */
+.depth-panel[data-depth="surface"]     .depth-stage { gap: var(--sp-6); } /* 표면=한 줄이 숨쉬게 */
+.depth-panel[data-depth="bytecode"]    .depth-tagline { max-width: 60ch; }
+.depth-panel[data-depth="interpreter"] .depth-tagline { max-width: 52ch; }
+.depth-panel[data-depth="memory"]      .depth-tagline { max-width: 44ch; }
+
+/* 인테이크 = '당신의 깊이(04)': 방문자의 입력이 00→03 하강을 잇는 다음 층.
+   같은 고스트 유물 언어를 써 '입력=출력, 같은 시스템'과 플랫폼 씨앗을 각인. */
+.intake { position: relative; overflow: clip; }
+.intake > * { position: relative; z-index: 1; }
+.intake::before {
+  content: "04" / ""; position: absolute; z-index: 0;
+  top: clamp(var(--sp-6), 9vh, var(--sp-10)); right: calc(-0.02 * var(--stage-max));
+  font-family: var(--font-code); font-weight: var(--fw-bold);
+  line-height: 0.78; letter-spacing: -0.05em; color: var(--accent);
+  font-size: clamp(6rem, 22vw, 16rem); opacity: 0.05;
+  pointer-events: none; user-select: none;
+}
+@media (max-width: 640px) { .intake::before { right: calc(-1 * var(--sp-3)); opacity: 0.04; } }
+
+/* ── ⑤ 코다: 4깊이 완주 후 '다시 표면으로 응결' 표식(액센트 헤어라인) ─────── */
+.coda .coda__headline { position: relative; padding-top: var(--sp-6); }
+.coda .coda__headline::before {
+  content: ""; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 40px; height: 2px; background: var(--accent);
+  box-shadow: var(--glow-accent);
+}
+
+/* ---- 반응형: 모바일에서 위계 유지, 무대 여백 축소 --------------------- */
+@media (max-width: 640px) {
+  .depth-stage { padding: var(--sp-8) var(--gutter); gap: var(--sp-4); }
+  .a-bytecode .ins { grid-template-columns: 3ch 16ch 1fr; }
+  .depth-rail { right: var(--sp-2); }
+  .depth-rail a .name { display: none; }   /* 모바일은 눈금만 */
+  /* 태그라인(풀폭 내레이션)이 우측 고정 레일 눈금과 맞닿지 않게 우측 여백 확보.
+     실측: 375px에서 눈금 좌단 ≈ x329, 태그라인 박스 우단 x355 — sp-7(48px) 여백으로
+     텍스트 우단을 ~x307까지 당겨 ~22px 여유로 클리어(내레이션 measure도 소폭 단축→가독 개선). */
+  .depth-tagline { padding-right: var(--sp-7); }
+  /* 모바일: 고스트는 더 잠기게(콘텐츠와 겹침 완화), 게이지 축선 우측 정렬 */
+  .depth-panel[data-depth] .depth-stage::before { right: calc(-1 * var(--sp-3)); opacity: 0.028; }
+  #depth-rail::before { right: 7px; }
+}

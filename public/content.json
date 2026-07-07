@@ -1,0 +1,119 @@
+{
+  "profile": {
+    "name": "변도진",
+    "role": "Python 개발자",
+    "hook": "print 한 줄의 표면 아래, CPython의 심연까지 내려가는 사람",
+    "oneLiner": "print(\"Hello, Python!\")",
+    "pillars": [
+      {
+        "title": "경험을 공유하는 것을 좋아합니다",
+        "body": "기술 블로그에 100개의 글을 쓰고 누적 3,300+ 조회를 얻었습니다. PyCon에서 CPython을 주제로 두 해 연속 연사했습니다.",
+        "evidence": "블로그 100글 · 3,300+ 조회 · PyCon 2회 연사"
+      },
+      {
+        "title": "문제에 대해 고민하는 것을 즐깁니다",
+        "body": "효율적인 풀이를 탐구하는 일이 즐겁습니다. 백준을 꾸준히 풀어 Platinum 4(상위 2.5%)에 올랐고, 그 문제해결력으로 삼성 SW 역량테스트 B형을 취득했습니다.",
+        "evidence": "백준 Platinum 4 (2.5%) · 삼성 SW 역량테스트 B형"
+      }
+    ],
+    "contact": [
+      { "label": "Email", "value": "byundojin0216@gmail.com", "href": "mailto:byundojin0216@gmail.com" },
+      { "label": "Velog", "value": "기술 블로그 (100글 · 3,300+ 조회)", "href": null, "needsUrl": true },
+      { "label": "GitHub", "value": "코드 저장소", "href": null, "needsUrl": true }
+    ]
+  },
+  "depths": [
+    {
+      "id": "surface",
+      "tagline": "누구나 매일 쓰는 한 줄. 나는 이 한 줄이 화면에 닿기까지 무슨 일이 벌어지는지 궁금했다.",
+      "focal": { "type": "code-line", "code": "print(\"Hello, Python!\")", "lang": "python", "annotation": "표면 — 모두가 아는 그 한 줄" },
+      "support": [
+        { "type": "spec-badge", "label": "Python 개발자", "value": "변도진" },
+        { "type": "prose", "body": "대부분은 여기서 멈춘다. 결과가 나오니까. 나는 여기서 시작한다 — 이 한 줄이 실제로 어떻게 실행되는지." }
+      ]
+    },
+    {
+      "id": "bytecode",
+      "tagline": "표면 아래로 한 겹. 파이썬은 이 한 줄을 이렇게 '분해'해서 실행한다.",
+      "focal": {
+        "type": "bytecode-dump",
+        "source": "print(\"Hello, Python!\")",
+        "caption": "CPython 3.12 · dis(\"print('Hello, Python!')\") 실제 출력",
+        "instructions": [
+          { "offset": 0, "opname": "RESUME", "arg": "0" },
+          { "offset": 2, "opname": "PUSH_NULL" },
+          { "offset": 4, "opname": "LOAD_NAME", "arg": "print" },
+          { "offset": 6, "opname": "LOAD_CONST", "arg": "'Hello, Python!'" },
+          { "offset": 8, "opname": "CALL", "arg": "1" },
+          { "offset": 16, "opname": "RETURN_VALUE" }
+        ]
+      },
+      "support": [
+        { "type": "slide", "event": "PyCon Korea 2024", "year": "2024", "title": "print(\"Hello, Python!\")", "role": "연사 · print의 내부 동작", "url": "https://www.youtube.com/watch?v=aFBLC0BF_Vk" },
+        { "type": "prose", "body": "2024년 PyCon에서, 나는 바로 이 한 줄의 print가 CPython 안에서 어떻게 움직이는지를 발표 주제로 삼았다." }
+      ]
+    },
+    {
+      "id": "interpreter",
+      "tagline": "명령을 하나씩 실행하는 루프. 그리고 나는 — 이 언어 자체에 손을 댔다.",
+      "focal": {
+        "type": "call-stack",
+        "caption": "CPython 평가 루프 — 모든 파이썬 코드가 지나는 자리",
+        "highlightIndex": 2,
+        "frames": [
+          { "func": "PyObject_Vectorcall", "module": "call.c", "line": 0 },
+          { "func": "builtin_print", "module": "bltinmodule.c", "line": 0 },
+          { "func": "_PyEval_EvalFrameDefault", "module": "ceval.c", "line": 0 }
+        ]
+      },
+      "support": [
+        { "type": "slide", "event": "PyCon Korea 2025", "year": "2025", "title": "defer: print(title)", "role": "연사 · Python의 defer 예약어 직접 구현 (오영기 공동)", "url": "https://www.youtube.com/watch?v=elQvXbsKi3o" },
+        { "type": "link-out", "label": "예약어가 되기까지: CPython 딥다이브 — 요즘IT 기고", "href": "https://yozm.wishket.com/magazine/detail/3560/" }
+      ]
+    },
+    {
+      "id": "memory",
+      "tagline": "가장 깊은 곳. 객체와 참조가 실제로 '사는' 자리. 여기까지 내려와 본 적 있는가.",
+      "focal": {
+        "type": "memory-cell",
+        "label": "PyObject",
+        "type_field": "str",
+        "refcount": 1,
+        "value": "'Hello, Python!'",
+        "caption": "표면의 문자열은, 이 깊이에서 refcount를 가진 하나의 객체다."
+      },
+      "support": [
+        { "type": "trace", "kind": "algorithm", "label": "백준 온라인 저지", "value": "Platinum 4 · 상위 2.5%", "detail": "효율적인 풀이를 탐구하며 꾸준히 쌓아 올린 문제해결력" },
+        { "type": "trace", "kind": "career", "label": "사이버메드 · Back-End 인턴", "value": "2024.12 – 2025.03", "detail": "DICOM Web 표준 규격에 맞는 Application Server · 외부 API Adapter Server 개발" }
+      ],
+      "coda": {
+        "headline": "print 한 줄에서 시작해, 바이트코드와 인터프리터를 지나 메모리의 바닥까지 함께 내려왔습니다.\n이만큼 파고드는 사람과, 한 시간쯤 이야기해보고 싶지 않으신가요?",
+        "cta": { "label": "딥다이브를 시작하기 — 당신의 질문을 던져보세요", "target": "intake" }
+      }
+    }
+  ],
+  "archive": {
+    "certifications": ["정보처리산업기사", "삼성 SW 역량테스트 B형"],
+    "awards": [
+      { "label": "2024 광주 AI·SW 체험축전", "date": "2024.05", "detail": "스마트화분 insam 부스 운영, 전공동아리 kody 팀원들과 600+명에게 프로젝트 설명" },
+      { "label": "2023 아이디어 페스티벌", "date": "2023.12–2024.01", "detail": "웹 기반 가상화폐 프로젝트 '깡깡코인' 제작, 16개 팀 중 2위 우수상" },
+      { "label": "C언어 페스티벌", "date": "2022.06–07", "detail": "작도 프로그램 제작, 36개 팀 중 2위 우수상" }
+    ]
+  },
+  "intake": {
+    "opening": "당신의 깊이를 여기에 쏟아부으세요. 던진 소스와 이야기는 카드로 쌓이고, 정리되어 이 포트폴리오를 살찌웁니다.",
+    "autofocusFirst": true,
+    "questions": [
+      { "id": "q_now", "depthHint": "surface", "prompt": "지금 가장 깊게 파고들고 있는 문제는 무엇인가요?", "placeholder": "표면의 증상부터 바닥의 원인까지, 편하게 풀어놓으세요…" },
+      { "id": "q_moment", "depthHint": "bytecode", "prompt": "'표면 아래'를 처음 들여다본 순간은 언제였나요?", "placeholder": "print 한 줄이 궁금해진 그 순간, 혹은 당신만의 첫 딥다이브…" },
+      { "id": "q_change", "depthHint": "interpreter", "prompt": "당신이 직접 '바꾼 것'은 무엇인가요? (도구·언어·팀·관행 무엇이든)", "placeholder": "defer 예약어처럼, 이미 정해진 것에 손을 댄 경험…" },
+      { "id": "q_deepest", "depthHint": "memory", "prompt": "당신이 내려가 본 가장 깊은 곳은 어디였나요?", "placeholder": "refcount, 메모리, 커밋 로그… 남들이 멈춘 곳에서 한 겹 더 내려간 이야기…" },
+      { "id": "q_free", "depthHint": "unassigned", "prompt": "그 밖에, 꼭 남기고 싶은 이야기·자료가 있나요?", "placeholder": "무엇이든 자유롭게…" }
+    ],
+    "dropzone": {
+      "prompt": "소스·이야기를 여기로 던지세요",
+      "hint": "코드 · 글 · 슬라이드 · 링크 · 커밋 — 무엇이든 붙여넣기하거나 끌어다 놓으면 유물 카드로 쌓입니다.",
+      "acceptedHint": "붙여넣기(⌘V/Ctrl+V) · 드래그 앤 드롭 모두 가능"
+    }
+  }
+}

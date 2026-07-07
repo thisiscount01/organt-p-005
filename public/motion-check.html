@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>모션 시스템 라이브 검증 — motion.css</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin:0; background:#0D1117; color:#E6EDF3; font-family: ui-monospace, "JetBrains Mono", monospace; }
+  header { padding:16px 20px; border-bottom:1px solid #1C2230; }
+  h1 { font-size:15px; margin:0 0 4px; letter-spacing:.02em; }
+  .sub { color:#7C8896; font-size:12px; }
+  main { display:grid; grid-template-columns: 1fr 1fr; gap:0; min-height: calc(100vh - 58px); }
+  @media (max-width: 820px){ main{ grid-template-columns:1fr; } }
+  #panel { border-right:1px solid #1C2230; overflow:auto; padding:16px 20px; }
+  #stageWrap { position:relative; }
+  iframe { width:100%; height:100%; min-height:60vh; border:0; background:#0D1117; }
+  .row { display:flex; gap:8px; align-items:flex-start; padding:7px 0; border-bottom:1px dashed #1C2230; font-size:13px; }
+  .tag { flex:0 0 46px; font-weight:700; }
+  .pass { color:#5EEAD4; } .fail { color:#FF6B6B; } .info { color:#9DA7B3; }
+  .name { color:#E6EDF3; } .detail { color:#7C8896; display:block; margin-top:2px; }
+  #summary { margin-top:14px; padding:10px 12px; border:1px solid #1C2230; border-radius:8px; font-size:14px; }
+  button { font:inherit; background:#2BD4B4; color:#04120E; border:0; border-radius:8px; padding:8px 14px; cursor:pointer; margin-top:10px; }
+  code { color:#82AAFF; }
+</style>
+</head>
+<body>
+<header>
+  <h1>모션 시스템 라이브 검증 <span class="sub">— public/motion.css (owner: 모션 애니메이터)</span></h1>
+  <div class="sub">실제 페이지(/)를 iframe으로 로드 → motion.css 주입 → 시그니처 애니메이션이 computed로 붙는지 <code>getAnimations()</code>로 확인. 브라우저에서 여세요.</div>
+</header>
+<main>
+  <section id="panel">
+    <div id="results">검증 준비 중…</div>
+    <div id="summary">—</div>
+    <button id="rerun" type="button">다시 검증</button>
+    <p class="sub" style="margin-top:14px">참고: reduced-motion 등가성은 CSS 게이트(<code>@media (prefers-reduced-motion)</code>)로 보장 — OS에서 '동작 줄이기'를 켜고 iframe을 새로고침하면 시그니처가 사라지고(움직임 0) 콘텐츠·깊이는 그대로여야 합니다.</p>
+  </section>
+  <section id="stageWrap">
+    <iframe id="stage" src="/" title="deep dive portfolio"></iframe>
+  </section>
+</main>
+
+<script>
+(function(){
+  const results = document.getElementById("results");
+  const summary = document.getElementById("summary");
+  const stage = document.getElementById("stage");
+  let pass = 0, fail = 0;
+
+  function line(kind, name, detail){
+    const div = document.createElement("div");
+    div.className = "row";
+    const t = kind === "PASS" ? "pass" : kind === "FAIL" ? "fail" : "info";
+    div.innerHTML = `<span class="tag ${t}">${kind}</span><span class="name">${name}${detail?`<span class="detail">${detail}</span>`:""}</span>`;
+    results.appendChild(div);
+    if (kind === "PASS") pass++; else if (kind === "FAIL") fail++;
+  }
+
+  // 요소의 running animation 이름들
+  function animNames(el){
+    if (!el || !el.getAnimations) return [];
+    return el.getAnimations().map(a => (a.animationName || (a.effect && a.effect.getKeyframes && "css") || "")).filter(Boolean);
+  }
+  function hasAnim(el, name){ return animNames(el).includes(name); }
+
+  function run(){
+    results.innerHTML = ""; pass = 0; fail = 0;
+    let doc;
+    try { doc = stage.contentDocument; } catch(e){ line("FAIL","iframe 문서 접근 불가", e.message); return finish(); }
+    if (!doc || !doc.querySelector) { line("FAIL","iframe 문서 미준비"); return finish(); }
+
+    // 1) motion.css 주입(미연결 시) — 통합 전에도 검증 가능
+    const linked = !!doc.querySelector('link[href*="motion.css"]');
+    if (!linked){
+      const l = doc.createElement("link");
+      l.rel = "stylesheet"; l.href = "motion.css";
+      doc.head.appendChild(l);
+      line("INFO","index.html에 motion.css 미연결 → 검증용으로 주입", "통합 시 프론트가 app.css 뒤에 &lt;link&gt; 추가 필요");
+    } else {
+      line("PASS","index.html이 motion.css를 이미 연결");
+    }
+
+    // 2) 앱 렌더 완료 대기 후 검증
+    let tries = 0;
+    (function wait(){
+      const panels = doc.querySelectorAll(".depth-panel");
+      const codeLine = doc.querySelector('[data-depth="surface"] .a-code-line');
+      if ((!panels.length || !codeLine) && tries++ < 60){ return setTimeout(wait, 100); }
+      // 스크롤 진입 시뮬레이션: 모든 .reveal에 is-in 부여(하단 패널 포함)
+      doc.querySelectorAll(".reveal").forEach(r => r.classList.add("is-in"));
+      // 재계산 프레임 후 검사
+      requestAnimationFrame(() => requestAnimationFrame(check));
+    })();
+
+    function check(){
+      // reduced-motion이 켜져 있으면 시그니처는 의도적으로 없음(등가성) — 그 사실을 알림
+      const reduce = stage.contentWindow.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (reduce){
+        line("INFO","OS 'reduced-motion' 활성 감지 — 시그니처 비활성이 정상(등가성)", "콘텐츠·깊이·aria는 유지되어야 함");
+      }
+
+      const checks = [
+        ["surface · 히어로 boot", '[data-depth="surface"] .a-code-line', ["sig-boot","sig-settle"]],
+        ["bytecode · 분해",       '[data-depth="bytecode"] .a-bytecode .ins', ["sig-decompose"]],
+        ["interpreter · 뒤집힘",  '[data-depth="interpreter"] .a-callstack .frame', ["sig-invert"]],
+        ["memory · 침강",         '[data-depth="memory"] .a-memgrid .a-memcell', ["sig-sink"]],
+        ["coda · 응결",           '#coda-headline', ["sig-condense"]],
+      ];
+      checks.forEach(([label, sel, wants]) => {
+        const el = doc.querySelector(sel);
+        if (!el){ line("FAIL", label + " — 대상 요소 없음", sel); return; }
+        const names = animNames(el);
+        const got = wants.filter(w => names.includes(w));
+        if (reduce){
+          got.length === 0
+            ? line("PASS", label + " — reduced-motion에서 시그니처 없음(정상)", "요소는 표시됨: " + (el.offsetParent !== null || el.getClientRects().length>0))
+            : line("FAIL", label + " — reduced-motion인데 시그니처가 돎", got.join(", "));
+        } else {
+          got.length
+            ? line("PASS", label + " — 시그니처 부착", "getAnimations: " + names.join(", "))
+            : line("FAIL", label + " — 시그니처 미부착", "관측된 anim: " + (names.join(", ")||"none"));
+        }
+      });
+
+      // 스태거 검증(분해 행 지연이 서로 다른가)
+      const ins = doc.querySelectorAll('[data-depth="bytecode"] .a-bytecode .ins');
+      if (ins.length >= 2 && !reduce){
+        const delays = [...ins].map(el => {
+          const a = el.getAnimations().find(a => a.animationName === "sig-decompose");
+          return a ? (a.effect.getComputedTiming().delay) : null;
+        });
+        const distinct = new Set(delays.filter(d => d != null)).size;
+        distinct >= Math.min(ins.length, 3)
+          ? line("PASS", "분해 stagger — 행별 지연 상이", "delays(ms): " + delays.join(", "))
+          : line("FAIL", "분해 stagger — 지연이 동일(순차 아님)", "delays: " + delays.join(", "));
+      }
+
+      finish();
+    }
+  }
+
+  function finish(){
+    const okAll = fail === 0 && pass > 0;
+    summary.innerHTML = `<b class="${okAll?'pass':'fail'}">${okAll?'✔ 통과':'✗ 확인 필요'}</b> — PASS ${pass} · FAIL ${fail}`;
+  }
+
+  stage.addEventListener("load", () => setTimeout(run, 300));
+  document.getElementById("rerun").addEventListener("click", () => { stage.contentWindow.location.reload(); });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>딥다이브 포트폴리오 — 아트 디렉션 스타일가이드 · 변도진</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Nanum+Gothic+Coding&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="artifacts.css">
+<style>
+  /* ── 스타일가이드 문서 전용 셸(제품 스타일 아님) ── */
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg-app);color:var(--text-primary);font-family:var(--font-body);
+       line-height:var(--lh-body);-webkit-font-smoothing:antialiased}
+  .wrap{max-width:var(--stage-max);margin-inline:auto;padding:0 var(--gutter)}
+  section{padding:var(--sp-9) 0;border-top:1px solid var(--line)}
+  section:first-of-type{border-top:0}
+  h2.sec{font-family:var(--font-code);font-size:var(--fs-h1);letter-spacing:var(--ls-tight);margin-bottom:var(--sp-2)}
+  h2.sec .n{color:var(--accent);font-size:var(--fs-caption);letter-spacing:var(--ls-wide);display:block;margin-bottom:var(--sp-2)}
+  .lead{color:var(--text-secondary);max-width:var(--measure);margin-bottom:var(--sp-6)}
+  .grid{display:grid;gap:var(--sp-5)}
+  .cols-2{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+  .cols-3{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+  .card{background:var(--surface-raised);border:1px solid var(--line);border-radius:var(--radius);padding:var(--sp-5)}
+  .k{font-family:var(--font-code);font-size:var(--fs-caption);color:var(--text-tertiary)}
+  table{width:100%;border-collapse:collapse;font-family:var(--font-code);font-size:var(--fs-caption)}
+  th,td{text-align:left;padding:var(--sp-2) var(--sp-3);border-bottom:1px solid var(--line)}
+  th{color:var(--text-tertiary);font-weight:var(--fw-medium)}
+  .pass{color:var(--code-str)} .aaa{color:var(--accent)} .fail{color:#ff6b6b}
+  .swatch{height:64px;border-radius:var(--radius-sm);border:1px solid var(--line);margin-bottom:var(--sp-2)}
+  .rule{display:flex;gap:var(--sp-3);align-items:flex-start;margin-bottom:var(--sp-3)}
+  .rule .ok{color:var(--code-str)} .rule .no{color:#ff6b6b}
+  .mini{font-size:var(--fs-caption);color:var(--text-tertiary)}
+  .tophead{padding:var(--sp-6) 0 0}
+  .badge-inline{display:inline-block;font-family:var(--font-code);font-size:var(--fs-micro);
+    letter-spacing:var(--ls-wide);color:var(--accent);border:1px solid var(--accent-line);
+    border-radius:var(--radius-pill);padding:2px var(--sp-3);text-transform:uppercase}
+  .depth-demo{border:1px solid var(--line);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:var(--sp-5)}
+  .depth-demo .stage{padding:var(--sp-8) var(--sp-6);min-height:280px;display:grid;align-content:center;gap:var(--sp-4);position:relative}
+  .count-note{font-family:var(--font-code);font-size:var(--fs-caption);color:var(--text-tertiary);
+    border-top:1px dashed var(--line);padding:var(--sp-3) var(--sp-6);background:var(--surface-sunken)}
+  .count-note b{color:var(--accent)}
+  .toc{position:sticky;top:0;background:color-mix(in srgb,var(--bg-app) 88%,transparent);
+    backdrop-filter:blur(8px);z-index:var(--z-nav);border-bottom:1px solid var(--line)}
+  .toc .wrap{display:flex;flex-wrap:wrap;gap:var(--sp-4);padding-block:var(--sp-3);font-family:var(--font-code);font-size:var(--fs-caption)}
+  .toc a{color:var(--text-secondary);text-decoration:none}
+  .toc a:hover{color:var(--accent)}
+</style>
+</head>
+<body>
+
+<nav class="toc"><div class="wrap">
+  <span class="k">DEEPDIVE / 변도진 ·</span>
+  <a href="#hero">첫화면</a><a href="#concept">컨셉</a><a href="#color">컬러·대비</a>
+  <a href="#type">타이포</a><a href="#grid">그리드</a><a href="#emph">강조등급</a>
+  <a href="#depths">깊이 4단</a><a href="#artifacts">유물타입</a><a href="#person">인물표현</a><a href="#intake">인테이크</a>
+</div></nav>
+
+<header class="wrap tophead">
+  <span class="badge-inline">Art Direction v1</span>
+  <h1 style="font-family:var(--font-code);font-size:var(--fs-display);letter-spacing:var(--ls-tight);margin:var(--sp-4) 0">
+    딥다이브 포트폴리오 — 시각 언어
+  </h1>
+  <p class="lead">모노스페이스를 주인공으로 한 터미널 다크 시스템. 한 줄의 코드가 초점을 잡으며
+    <span style="color:var(--accent)">surface → bytecode → interpreter → memory</span> 로 확장된다.
+    한 인물은 얼굴이 아니라 '사고의 유물'(커밋·발표·풀이·메모리)로 표현한다.
+    이 문서의 모든 색은 아래 <b>라이브 대비 검사기</b>가 실제 토큰값으로 계산해 AA 통과를 증명한다.</p>
+</header>
+
+<!-- ============ 1. 첫 화면(히어로) — 5초 안에 '깊다' ============ -->
+<section id="hero" class="wrap">
+  <h2 class="sec"><span class="n">01 — FIRST SCREEN GATE</span>첫 화면: 핵심 블록 ≤3 · 동급 강조 0 · 5초 판독</h2>
+  <p class="lead">채용담당자가 열자마자 보는 화면. 카운트되는 블록은 딱 3개 —
+    ①한 줄(focal) ②정체 한 문장(support) ③정체 배지(support). ambient(커서·격자)는 카운트 제외.
+    시선 경로는 한 줄로 흐른다.</p>
+
+  <div class="depth-demo">
+    <div class="stage" style="background:var(--bg-surface)">
+      <div class="emph-ambient" aria-hidden="true"
+           style="background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:32px 32px;opacity:.25"></div>
+      <span class="depth-microlabel">00 · SURFACE</span>
+      <!-- ① focal -->
+      <div class="emph-focal a-code-line">
+        <span class="tok-func">print</span><span class="tok-punc">(</span><span class="tok-str">"Hello, Python!"</span><span class="tok-punc">)</span><span class="cursor"></span>
+      </div>
+      <!-- ② support -->
+      <p class="emph-support a-prose" style="font-size:var(--fs-body)">
+        누구나 매일 쓰는 이 한 줄 <span class="k">아래</span>를 끝까지 파고드는 Python 개발자.</p>
+      <!-- ③ support -->
+      <div class="emph-support" style="display:flex;gap:var(--sp-2);flex-wrap:wrap">
+        <span class="a-badge">Python 개발자</span>
+        <span class="a-badge">PyCon 연사 ×2</span>
+      </div>
+    </div>
+    <div class="count-note">카운트 블록 <b>3</b> (focal 1 · support 2) · 동급 강조 <b>0</b> · 액센트는 커서 <b>1점</b>에만 · 나머지는 ambient</div>
+  </div>
+  <p class="mini">※ 실제 제품에선 이 focal 한 줄이 흐릿(blur-far)하게 떠 있다가 초점이 잡히며 등장(모션 소유: 모션 애니메이터).</p>
+</section>
+
+<!-- ============ 2. 컨셉/축 ============ -->
+<section id="concept" class="wrap">
+  <h2 class="sec"><span class="n">02 — CONCEPT AXIS</span>은유의 축: 수직낙하 아님 — '초점이 잡히며 확장'</h2>
+  <div class="grid cols-2">
+    <div class="card">
+      <p class="k" style="margin-bottom:var(--sp-3)">왜 줌/해상도인가</p>
+      <p class="a-prose">'깊이 파고드는 사람'을 수직 스크롤로만 은유하면 흔한 관성이 된다.
+        대신 한 줄이 <b>초점을 잡으며(blur→선명)</b> 바이트코드·인터프리터·메모리 구조로 <b>확장</b>된다 —
+        해상도가 올라가는 감각이 '표면 아래를 끝까지 본다'는 정체성과 맞는다.</p>
+    </div>
+    <div class="card">
+      <p class="k" style="margin-bottom:var(--sp-3)">4깊이 = CPython 단면</p>
+      <p class="a-prose"><b>surface</b> 우리가 쓰는 한 줄 · <b>bytecode</b> 컴파일된 명령(PyCon 연사) ·
+        <b>interpreter</b> 실행 루프와 그가 바꾼 것(defer/CPython) · <b>memory</b> 객체·참조의 자리(백준·DICOM).
+        감정선: 궁금증 → 몰입 → 경외.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3. 컬러 + 라이브 대비 검사기 ============ -->
+<section id="color" class="wrap">
+  <h2 class="sec"><span class="n">03 — COLOR & CONTRAST</span>터미널 다크 베이스 + 단일 액센트(phosphor mint)</h2>
+  <p class="lead">깊이별 배경은 내려갈수록 어두워진다. 액센트는 하나(#5EEAD4) — 시선 착지·'살아있음'의 신호로만.
+    아래 표는 <b>페이지 로드시 실제 토큰값으로 대비를 계산</b>한다.</p>
+
+  <div class="grid cols-3" id="swatches" style="margin-bottom:var(--sp-6)"></div>
+
+  <div class="card" style="overflow-x:auto">
+    <p class="k" style="margin-bottom:var(--sp-3)">라이브 WCAG 대비 (AA=4.5 · AAA=7 · 큰텍스트 AA=3)</p>
+    <table id="contrast"><thead><tr><th>전경</th><th>배경</th><th>비율</th><th>판정</th></tr></thead><tbody></tbody></table>
+    <p class="mini" id="contrast-verdict" style="margin-top:var(--sp-3)"></p>
+  </div>
+</section>
+
+<!-- ============ 4. 타이포 ============ -->
+<section id="type" class="wrap">
+  <h2 class="sec"><span class="n">04 — TYPOGRAPHY</span>모노스페이스가 주인공, 본문은 절제</h2>
+  <p class="lead">코드/유물 = JetBrains Mono + Nanum Gothic Coding(한글 모노). 본문 = Pretendard. 세 폰트 모두 OFL(오픈).</p>
+  <div class="card">
+    <div style="font-family:var(--font-code);font-size:var(--fs-hero);line-height:var(--lh-tight);letter-spacing:var(--ls-tight)">Aa 가나 print()</div>
+    <div class="k" style="margin:var(--sp-2) 0 var(--sp-6)">--fs-hero · JetBrains Mono / Nanum Gothic Coding</div>
+    <div style="font-family:var(--font-code);font-size:var(--fs-display)">--fs-display · 깊이 타이틀 · 인터프리터</div>
+    <div style="font-family:var(--font-code);font-size:var(--fs-h2);margin-top:var(--sp-3)">--fs-h2 · 유물 제목 1.5rem</div>
+    <div style="font-family:var(--font-body);font-size:var(--fs-body);margin-top:var(--sp-3)">--fs-body · Pretendard 본문 17px — 표면 아래를 끝까지 파고드는 사람.</div>
+    <div style="font-family:var(--font-code);font-size:var(--fs-code);margin-top:var(--sp-3);color:var(--text-secondary)">--fs-code · dis(compile("print", ...))  0.95rem</div>
+    <div style="font-family:var(--font-code);font-size:var(--fs-micro);letter-spacing:var(--ls-wide);color:var(--accent);margin-top:var(--sp-3)">--FS-MICRO · 02 · INTERPRETER</div>
+  </div>
+</section>
+
+<!-- ============ 5. 그리드/여백 ============ -->
+<section id="grid" class="wrap">
+  <h2 class="sec"><span class="n">05 — GRID & SPACING</span>8px 베이스라인 · 여백이 곧 awe</h2>
+  <div class="grid cols-2">
+    <div class="card">
+      <p class="k">스페이싱 스케일 (8px 기반)</p>
+      <div style="display:flex;gap:var(--sp-2);align-items:flex-end;margin-top:var(--sp-4)">
+        <span style="width:4px;height:16px;background:var(--accent)"></span>
+        <span style="width:8px;height:24px;background:var(--accent)"></span>
+        <span style="width:16px;height:36px;background:var(--accent)"></span>
+        <span style="width:24px;height:48px;background:var(--accent)"></span>
+        <span style="width:32px;height:64px;background:var(--accent)"></span>
+        <span style="width:48px;height:88px;background:var(--accent-strong)"></span>
+      </div>
+      <p class="mini" style="margin-top:var(--sp-3)">4·8·12·16·24·32·48·64·96·128 (--sp-1…10)</p>
+    </div>
+    <div class="card">
+      <p class="k">레이아웃 규칙</p>
+      <ul class="a-prose" style="margin-top:var(--sp-3);padding-left:1.2em;color:var(--text-secondary)">
+        <li>산문 최대폭 <b>--measure 68ch</b> (가독)</li>
+        <li>콘텐츠 프레임 <b>--stage-max 1200px</b>, 좌우 <b>--gutter clamp(20–80px)</b></li>
+        <li>12열 그리드 · 무대 콘텐츠는 <b>세로 중앙 정렬</b>(align-content:center)</li>
+        <li>첫 화면 여백 지배(≥70%) — 밀도로 감탄하지 않고 여백으로 감탄</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 6. 강조등급 ============ -->
+<section id="emph" class="wrap">
+  <h2 class="sec"><span class="n">06 — EMPHASIS GRADES</span>focal · support · ambient (시각 위계 = 토큰)</h2>
+  <div class="grid cols-3">
+    <div class="card"><span class="badge-inline">focal</span>
+      <p class="a-prose" style="margin-top:var(--sp-3)">뷰당 <b>1개</b>. 시선이 착지하는 단 하나. 유일하게 액센트 허용. 카운트 O.</p></div>
+    <div class="card"><span class="badge-inline" style="color:var(--text-secondary);border-color:var(--line)">support</span>
+      <p class="a-prose" style="margin-top:var(--sp-3)">뷰당 <b>≤2</b>. focal을 뒷받침. 액센트 채움 금지 — 텍스트 위계로만. 카운트 O.</p></div>
+    <div class="card"><span class="badge-inline" style="color:var(--text-tertiary);border-color:var(--line)">ambient</span>
+      <p class="a-prose" style="margin-top:var(--sp-3)">배경 텍스처(흐르는 opcode·격자). <b>카운트 X</b>, aria-hidden. 시선 안 뺏음.</p></div>
+  </div>
+  <p class="mini" style="margin-top:var(--sp-4)">→ 첫 화면 카운트 블록 = focal(1) + support(≤2) ≤ <b style="color:var(--accent)">3</b>. 동급 강조 0 보장.</p>
+</section>
+
+<!-- ============ 7. 깊이 4단 시각슬롯 ============ -->
+<section id="depths" class="wrap">
+  <h2 class="sec"><span class="n">07 — DEPTH SLOTS</span>깊이 4단 시각슬롯 (프론트 렌더 계약 입력)</h2>
+  <p class="lead">각 깊이의 라벨·강조등급·유물타입·배경을 확정한다. 실제 콘텐츠 텍스트는 스토리텔러가 채움.
+    기계 판독형은 <a class="a-link" href="depth-schema.json">depth-schema.json</a>.</p>
+
+  <!-- surface -->
+  <div class="depth-demo">
+    <div class="stage" style="background:var(--bg-surface)">
+      <span class="depth-microlabel">00 · SURFACE</span>
+      <div class="emph-focal a-code-line" style="font-size:var(--fs-display)"><span class="tok-func">print</span><span class="tok-punc">(</span><span class="tok-str">"Hello, Python!"</span><span class="tok-punc">)</span></div>
+      <p class="depth-tagline">우리가 매일 쓰는 한 줄 · <span class="k">focal=code-line</span></p>
+    </div>
+    <div class="count-note">유물타입: <b>code-line</b>(focal) · spec-badge/prose(support) · 배경 --bg-surface</div>
+  </div>
+
+  <!-- bytecode -->
+  <div class="depth-demo">
+    <div class="stage" style="background:var(--bg-bytecode)">
+      <span class="depth-microlabel">01 · BYTECODE</span>
+      <div class="emph-focal artifact a-bytecode" style="max-width:520px">
+        <div class="artifact__chrome">dis(compile('print("Hello, Python!")'))</div>
+        <div class="artifact__body">
+          <div class="ins is-focus"><span class="off">0</span><span class="op">LOAD_NAME</span><span class="arg">0 (print)</span></div>
+          <div class="ins"><span class="off">2</span><span class="op">LOAD_CONST</span><span class="arg">0 ('Hello, Python!')</span></div>
+          <div class="ins"><span class="off">4</span><span class="op">CALL_FUNCTION</span><span class="arg">1</span></div>
+          <div class="ins"><span class="off">6</span><span class="op">RETURN_VALUE</span><span class="arg"></span></div>
+        </div>
+      </div>
+      <p class="depth-tagline">표면 아래 — 컴파일된 명령들 · <span class="k">focal=bytecode-dump · support=slide(PyCon)</span></p>
+    </div>
+    <div class="count-note">유물타입: <b>bytecode-dump</b>(focal) · slide/link-out/prose(support) · 배경 --bg-bytecode</div>
+  </div>
+
+  <!-- interpreter -->
+  <div class="depth-demo">
+    <div class="stage" style="background:var(--bg-interpreter)">
+      <span class="depth-microlabel">02 · INTERPRETER</span>
+      <div class="emph-focal a-callstack" style="max-width:520px">
+        <div class="frame">frame: <span class="fn">&lt;module&gt;</span> · main.py:1</div>
+        <div class="frame is-current">frame: <span class="fn">_PyEval_EvalFrameDefault</span> · ceval.c · <span style="color:var(--accent)">현재</span></div>
+        <div class="frame">op: <span class="fn">defer</span> · 그가 언어에 심은 예약어</div>
+      </div>
+      <p class="depth-tagline">실행을 돌리는 루프 — 그리고 그가 바꾼 것 · <span class="k">focal=call-stack · support=commit</span></p>
+    </div>
+    <div class="count-note">유물타입: <b>call-stack</b>(focal) · code-line/commit/prose(support) · 배경 --bg-interpreter</div>
+  </div>
+
+  <!-- memory -->
+  <div class="depth-demo">
+    <div class="stage" style="background:var(--bg-memory)">
+      <span class="depth-microlabel">03 · MEMORY</span>
+      <div class="emph-focal a-memgrid" style="max-width:560px">
+        <div class="a-memcell"><div class="label">PyObject</div><div class="value">'Hello, Python!'</div><span class="refcount">refcount 2</span></div>
+        <div class="a-memcell"><div class="label">백준 티어</div><div class="value" style="color:var(--accent)">Platinum 4</div><span class="refcount">상위 2.5%</span></div>
+        <div class="a-memcell"><div class="label">사이버메드</div><div class="value">DICOM App Server</div><span class="refcount">2024–25</span></div>
+      </div>
+      <p class="depth-tagline">가장 깊은 곳 — 객체와 참조가 사는 자리 · <span class="k">focal=memory-cell · support=trace</span></p>
+    </div>
+    <div class="count-note">유물타입: <b>memory-cell</b>(focal) · trace/spec-badge/prose(support) · 배경 --bg-memory · 직후 코다 CTA</div>
+  </div>
+
+  <!-- coda -->
+  <div class="depth-demo">
+    <div class="stage" style="background:var(--bg-memory);text-align:center">
+      <div class="emph-focal a-prose" style="font-size:var(--fs-h1);margin-inline:auto">이 사람과 <span style="color:var(--accent)">1시간</span> 이야기하고 싶다.</div>
+      <div><button class="btn-primary">당신의 질문을 던져보세요 →</button></div>
+    </div>
+    <div class="count-note">코다(비-depth): focal 문장 1 + primary 버튼 → 딥다이브 인테이크로 연결</div>
+  </div>
+</section>
+
+<!-- ============ 8. 유물타입 갤러리 ============ -->
+<section id="artifacts" class="wrap">
+  <h2 class="sec"><span class="n">08 — ARTIFACT TYPES</span>유물타입 갤러리 (10종 · 프론트 재사용 클래스)</h2>
+  <div class="grid cols-2">
+    <div class="card"><p class="k">commit</p>
+      <div class="a-commit" style="margin-top:var(--sp-3)"><span class="dot">●─</span><span class="hash">a1b9f0c</span><span class="subject">Add 'defer' keyword to grammar</span><span class="repo">cpython</span></div></div>
+    <div class="card"><p class="k">slide (얼굴 사진 대체)</p>
+      <div class="a-slide" style="margin-top:var(--sp-3);aspect-ratio:auto;padding:var(--sp-4)">
+        <span class="event">PYCON KR 2025</span><span class="title">defer: print(title)</span><span class="role">Speaker · 요즘IT 투고</span></div></div>
+    <div class="card"><p class="k">trace</p>
+      <div class="a-trace" style="margin-top:var(--sp-3)"><span class="label">알고리즘</span><span class="value">Platinum 4</span><span class="detail">백준 상위 2.5%</span></div></div>
+    <div class="card"><p class="k">spec-badge · link-out</p>
+      <div style="margin-top:var(--sp-3);display:flex;gap:var(--sp-2);flex-wrap:wrap;align-items:center">
+        <span class="a-badge">정보처리산업기사</span><span class="a-badge">삼성 SW B형</span>
+        <a class="a-link" href="#">요즘IT 기고</a></div></div>
+  </div>
+  <p class="mini" style="margin-top:var(--sp-4)">나머지: code-line · bytecode-dump · call-stack · memory-cell · prose — 위 깊이 데모에서 시연됨.</p>
+</section>
+
+<!-- ============ 9. 인물 표현 규칙 ============ -->
+<section id="person" class="wrap">
+  <h2 class="sec"><span class="n">09 — PERSON AS ARTIFACT</span>한 인물 = 사고의 유물 (표현 규칙)</h2>
+  <div class="grid cols-2">
+    <div class="card">
+      <p class="k" style="color:var(--code-str)">DO — 사고의 궤적으로</p>
+      <div class="rule" style="margin-top:var(--sp-3)"><span class="ok">✓</span><span class="a-prose">얼굴 사진 대신 <b>커밋·발표 슬라이드·바이트코드·풀이 흔적·메모리 셀</b>을 유물처럼.</span></div>
+      <div class="rule"><span class="ok">✓</span><span class="a-prose">모든 유물은 <b>실제 사실</b> 하나를 담는다(PyCon·CPython·백준·DICOM). 과장 0.</span></div>
+      <div class="rule"><span class="ok">✓</span><span class="a-prose">유물은 모노스페이스 + 터미널/코드 프레임. 액센트는 '살아있는' 한 점에만.</span></div>
+    </div>
+    <div class="card">
+      <p class="k" style="color:#ff6b6b">DON'T</p>
+      <div class="rule" style="margin-top:var(--sp-3)"><span class="no">✕</span><span class="a-prose">인물 사진·아바타·스톡 일러스트로 인물을 '설명'하지 않는다.</span></div>
+      <div class="rule"><span class="no">✕</span><span class="a-prose">기능 6칸 그리드·정적 스크린샷 나열(동급 강조 남발) 금지.</span></div>
+      <div class="rule"><span class="no">✕</span><span class="a-prose">유물 없는 장식(순수 파티클·의미 없는 3D) 금지 — 모든 시각은 실체를 가리킨다.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 10. 딥다이브 인테이크 톤 ============ -->
+<section id="intake" class="wrap">
+  <h2 class="sec"><span class="n">10 — DEEP-DIVE INTAKE</span>인테이크 화면 시각 톤 (한 문항 리듬)</h2>
+  <p class="lead">채용용 폼이 아니라 '쏟게' 만드는 대화형 화면. 한 번에 질문 하나, 여백 지배, 커서가 기다린다.</p>
+  <div class="depth-demo">
+    <div class="stage" style="background:var(--bg-interpreter);text-align:center">
+      <span class="depth-microlabel" style="justify-self:center">DEEP DIVE · 01 / 06</span>
+      <div class="emph-focal" style="font-family:var(--font-code);font-size:var(--fs-display);color:var(--text-primary)">
+        이 프로젝트에서 가장 오래 붙잡았던 문제는?<span class="cursor"></span></div>
+      <div style="margin:var(--sp-4) auto 0;max-width:520px;border:1px dashed var(--accent-line);border-radius:var(--radius);
+                  padding:var(--sp-5);color:var(--text-tertiary);font-family:var(--font-code);font-size:var(--fs-caption)">
+        ⤓ 소스·이야기를 여기로 던지세요 (붙여넣기 / 드롭)</div>
+    </div>
+    <div class="count-note">focal=질문 1개 · 커서 autofocus · 드롭존은 support · 던진 입력 → 유물 카드로 낙관적 적재(depth=unassigned)</div>
+  </div>
+</section>
+
+<footer class="wrap" style="padding:var(--sp-8) 0;border-top:1px solid var(--line);color:var(--text-tertiary);font-family:var(--font-code);font-size:var(--fs-caption)">
+  산출물: <b>tokens.css</b> · <b>artifacts.css</b> · <b>depth-schema.json</b> · <b>style-guide.html</b> ·
+  <b>DESIGN.md</b> — 소유: 디자이너(아트 디렉션). 소비: 프론트/모션/백엔드. 실제 자료만 · 과장 0.
+</footer>
+
+<script>
+// ── 라이브 WCAG 대비 검사기: 실제 토큰값(getComputedStyle)으로 계산 ──
+(function(){
+  const cs = getComputedStyle(document.documentElement);
+  const tok = n => cs.getPropertyValue(n).trim();
+  function hex(c){ // #rgb/#rrggbb → [r,g,b]
+    c=c.replace('#',''); if(c.length===3)c=c.split('').map(x=>x+x).join('');
+    return [0,2,4].map(i=>parseInt(c.slice(i,i+2),16));
+  }
+  const lin=v=>{v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4);};
+  const Lum=([r,g,b])=>0.2126*lin(r)+0.7152*lin(g)+0.0722*lin(b);
+  const ratio=(f,b)=>{const a=Lum(hex(f)),c=Lum(hex(b));const hi=Math.max(a,c),lo=Math.min(a,c);return (hi+0.05)/(lo+0.05);};
+
+  // 스와치
+  const sw=[['--bg-surface','surface'],['--bg-memory','memory'],['--surface-raised','raised'],
+            ['--accent','accent'],['--accent-strong','accent-strong'],['--code-amber','amber'],
+            ['--code-kw','kw'],['--code-str','str'],['--code-func','func']];
+  document.getElementById('swatches').innerHTML = sw.map(([v,n])=>{
+    const val=tok(v);
+    return `<div><div class="swatch" style="background:${val}"></div><span class="k">${n} · ${val}</span></div>`;}).join('');
+
+  // 대비 표
+  const pairs=[
+    ['--text-primary','--bg-surface','본문/제목'],
+    ['--text-secondary','--bg-surface','보조'],
+    ['--text-tertiary','--surface-raised','메타(가장 밝은 배경)'],
+    ['--accent','--bg-surface','액센트 텍스트'],
+    ['--accent','--bg-memory','액센트 · 심연'],
+    ['--accent-strong','--bg-surface','버튼색 텍스트'],
+    ['--accent-ink','--accent-strong','버튼 위 텍스트'],
+    ['--code-kw','--surface-raised','코드 키워드'],
+    ['--code-str','--surface-raised','코드 문자열'],
+    ['--code-num','--surface-raised','코드 숫자'],
+    ['--code-func','--surface-raised','코드 함수'],
+    ['--code-comment','--surface-raised','코드 주석'],
+    ['--code-amber','--surface-raised','하이라이트'],
+  ];
+  let minr=99;
+  const rows=pairs.map(([f,b,l])=>{
+    const r=ratio(tok(f),tok(b)); minr=Math.min(minr,r);
+    const tag = r>=7?'<span class="aaa">AAA</span>':r>=4.5?'<span class="pass">AA</span>':r>=3?'<span class="pass">AA-큰텍스트</span>':'<span class="fail">FAIL</span>';
+    return `<tr><td>${f}<br><span class="mini">${l}</span></td><td>${b}</td><td>${r.toFixed(2)}:1</td><td>${tag}</td></tr>`;
+  }).join('');
+  document.querySelector('#contrast tbody').innerHTML=rows;
+  const v=document.getElementById('contrast-verdict');
+  v.innerHTML = minr>=4.5
+    ? `✓ 전 조합 최소 <b class="pass">${minr.toFixed(2)}:1</b> — 모두 WCAG AA(본문 4.5) 이상 통과.`
+    : `⚠ 최소 ${minr.toFixed(2)}:1 — 일부 큰텍스트 전용.`;
+})();
+</script>
+</body>
+</html>

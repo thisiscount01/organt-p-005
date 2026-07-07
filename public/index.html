@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>변도진 — print 한 줄의 표면 아래, CPython의 심연까지</title>
+<meta name="description" content="print 한 줄에서 시작해 바이트코드·인터프리터·메모리의 바닥까지 내려가는 Python 개발자 변도진의 딥다이브 포트폴리오." />
+<meta name="color-scheme" content="dark" />
+<meta property="og:title" content="변도진 — CPython의 심연까지 내려가는 사람" />
+<meta property="og:description" content="print 한 줄의 표면 아래, 바이트코드·인터프리터·메모리까지. 딥다이브 포트폴리오." />
+<meta property="og:type" content="website" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Nanum+Gothic+Coding&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="artifacts.css">
+<link rel="stylesheet" href="app.css">
+<link rel="stylesheet" href="motion.css">
+</head>
+<body>
+
+<a class="skip-link" href="#intake">딥다이브 인테이크로 건너뛰기</a>
+
+<!-- 스크롤 진행도 0..1 단일 소스 시각화(모션 소비: --scroll-progress) -->
+<div class="scroll-progress" aria-hidden="true"></div>
+
+<!-- 깊이 변화 스크린리더 방송 -->
+<div class="sr-only" role="status" aria-live="polite" id="depth-announcer"></div>
+
+<!-- 우측 미세 깊이 레일(원탭/키보드 점프) -->
+<nav class="depth-rail" id="depth-rail" aria-label="깊이 탐색">
+  <ul class="depth-rail" role="list"><!-- JS가 채움 --></ul>
+</nav>
+
+<!-- ===== 포트폴리오 본문(4깊이 + 코다) ===== -->
+<main id="deepdive" class="scroll-root">
+  <div id="depths-root"><!-- 깊이 패널: JS 렌더 --></div>
+  <section id="coda" class="coda" aria-labelledby="coda-headline" hidden>
+    <h2 class="coda__headline emph-focal reveal" id="coda-headline"></h2>
+    <button class="btn-primary reveal" id="coda-cta" type="button"></button>
+  </section>
+</main>
+
+<!-- ===== 딥다이브 인테이크(사용자가 소스·이야기를 쏟는 환경) ===== -->
+<section id="intake" class="intake" aria-labelledby="intake-title">
+  <div class="intake__inner">
+    <span class="depth-microlabel intake__eyebrow" id="intake-eyebrow">DEEP DIVE · INTAKE</span>
+    <h2 class="sr-only" id="intake-title">딥다이브 인테이크</h2>
+    <p class="intake__opening" id="intake-opening"></p>
+
+    <div class="intake__stage">
+      <div class="intake__progress" id="intake-progress" role="list" aria-label="질문 진행"></div>
+      <p class="intake__question" id="intake-question" aria-live="polite"></p>
+      <label class="sr-only" for="intake-answer" id="intake-answer-label">답변 입력</label>
+      <textarea class="intake__answer" id="intake-answer" rows="2" autocomplete="off" spellcheck="false"></textarea>
+      <div class="intake__controls">
+        <button class="btn-primary" id="intake-submit" type="button">담기 <span aria-hidden="true">↵</span></button>
+        <button class="btn-ghost" id="intake-skip" type="button">건너뛰기</button>
+        <span class="intake__hint" aria-hidden="true">Enter로 담기 · Shift+Enter 줄바꿈</span>
+      </div>
+    </div>
+
+    <div class="dropzone" id="dropzone" tabindex="0" role="button"
+         aria-label="소스·이야기를 붙여넣거나 끌어다 놓아 유물 카드로 담기">
+      <div class="dropzone__prompt" id="dz-prompt"></div>
+      <div class="dropzone__hint" id="dz-hint"></div>
+      <div class="dropzone__accepted" id="dz-accepted"></div>
+    </div>
+
+    <div class="intake__cards-head">
+      <span class="intake__cards-title">쌓인 유물</span>
+      <span class="intake__count" id="intake-count" aria-live="polite">0개</span>
+    </div>
+    <ul class="intake__cards" id="intake-cards" role="list"></ul>
+    <p class="intake__empty" id="intake-empty">아직 던진 것이 없습니다 — 위 질문에 답하거나, 소스를 붙여넣어 보세요.</p>
+  </div>
+</section>
+
+<!-- ===== 콜로폰: About / 아카이브 / 연락 (4깊이 게이트 밖) ===== -->
+<section class="colophon" id="colophon" aria-labelledby="colophon-title">
+  <div class="colophon__inner">
+    <div>
+      <span class="depth-microlabel eyebrow">ABOUT · 두 개의 축</span>
+      <h2 id="colophon-title" class="sr-only">변도진에 대하여</h2>
+      <div class="pillars" id="pillars"></div>
+    </div>
+    <div class="archive-grid" id="archive"></div>
+    <div>
+      <h3 style="font-family:var(--font-code);font-size:var(--fs-caption);letter-spacing:var(--ls-wide);text-transform:uppercase;color:var(--text-tertiary);margin:0 0 var(--sp-3)">Contact</h3>
+      <div class="contact-list" id="contact"></div>
+    </div>
+  </div>
+</section>
+
+<footer class="site-foot">
+  <span id="foot-name"></span> · print 한 줄에서 메모리의 바닥까지 · 실제 자료만 · 과장 0
+</footer>
+
+<noscript>
+  <div class="load-error">이 딥다이브 포트폴리오는 스크롤·인터랙션으로 깊이를 드러냅니다. JavaScript를 켜 주세요.</div>
+</noscript>
+
+<script src="app.js" defer></script>
+</body>
+</html>
