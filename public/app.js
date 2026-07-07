@@ -244,11 +244,11 @@
     const tag = (t.tagName || "").toLowerCase();
     return tag === "textarea" || tag === "input" || tag === "select" || t.isContentEditable === true;
   }
-  // 스크롤 완주 시 인테이크로 커서가 자동 이동한 뒤(autofocus)에도, 아직 아무것도
-  // 타이핑하지 않은 "빈 입력칸"이면 depth-jump 키를 계속 살려둔다 — 지울 편집 내용이
-  // 없어 안전하다. 실제로 답을 타이핑하기 시작하면(비어있지 않으면) 즉시 텍스트
-  // 입력을 우선해 편집을 방해하지 않는다(isInteractive 게이트의 "타이핑 중엔
-  // 가로채지 않는다"는 취지는 유지, 포커스 트랩만 해소).
+  // "필드가 비었나"만으로는 depth-jump 여부를 못 가른다 — 스크롤완주 autofocus로
+  // 빈 칸에 커서가 놓인 경우와, 사용자가 그 빈 칸을 직접 클릭해 타이핑을 시작하려는
+  // 경우가 둘 다 "비어있음"이라 구분이 안 된다. 그래서 판별축을
+  // "포커스가 어떻게 발생했나"로 바꾼다 — 아래 isEmptyTextField는 안전망으로만 쓴다
+  // (이미 내용이 있으면 제스처 여부와 무관하게 항상 타이핑 우선).
   function isEmptyTextField(t) {
     const tag = (t && t.tagName || "").toLowerCase();
     if (tag === "textarea" || tag === "input") return (t.value || "").length === 0;
@@ -278,6 +278,20 @@
       return idx;
     }
 
+    let pointerDownTarget = null;
+    const notePointerDown = (e) => { pointerDownTarget = e.target; };
+    document.addEventListener("pointerdown", notePointerDown, true);
+    document.addEventListener("touchstart", notePointerDown, true);
+    document.addEventListener("mousedown", notePointerDown, true);
+    const gestureFocused = new WeakSet();
+    document.addEventListener("focusin", (e) => {
+      const via = pointerDownTarget;
+      pointerDownTarget = null;
+      if (via && (via === e.target || (via.contains && via.contains(e.target)))) gestureFocused.add(e.target);
+      else gestureFocused.delete(e.target);
+    }, true);
+    document.addEventListener("focusout", (e) => { gestureFocused.delete(e.target); }, true);
+
     document.addEventListener("keydown", (e) => {
       if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
       if (e.key === "Escape" && isInteractive(e.target)) {
@@ -289,13 +303,12 @@
       }
       const inField = isInteractive(e.target);
       const k = e.key;
-      // j/k/숫자는 "문자를 만드는" 키 — 빈 입력칸이어도 답이 그 글자로 시작할 수 있으니
-      // 입력칸 안에서는(비었든 타이핑 중이든) 절대 가로채지 않는다(가로채면 첫 글자 유실).
-      const producesChar = k === "j" || k === "k" || (k >= "1" && k <= "4");
-      if (inField && producesChar) return;
-      // 문자를 만들지 않는 순수 이동 키(화살표/Home/End/PageUp/PageDown)만 "빈 입력칸"일 때
-      // 예외로 통과시켜 포커스 트랩을 풀어준다 — 실제로 타이핑 중이면(비어있지 않으면) 여전히 막는다.
-      if (inField && !isEmptyTextField(e.target)) return;
+      // 입력칸 안에서 실제로 타이핑 중(비어있지 않음)이면 depth-jump를 절대 가로채지
+      // 않는다 — j/k/숫자든 화살표든 편집을 방해하지 않는다(첫 글자 유실 방지).
+      // 입력칸이 "비어" 있으면(스크롤 완주 후 autofocus 직후처럼 아직 아무것도 안
+      // 쓴 상태) j/k/숫자/화살표 전부 depth-jump로 통과시킨다 — 지울 내용이 없어
+      // 안전하고, 그렇게 갇히는 포커스 트랩을 해소한다.
+      if (inField && (gestureFocused.has(e.target) || !isEmptyTextField(e.target))) return;
       if (k === "ArrowDown" || k === "j" || k === "PageDown") { e.preventDefault(); goto(current() + 1); }
       else if (k === "ArrowUp" || k === "k" || k === "PageUp") { e.preventDefault(); goto(current() - 1); }
       else if (k === "Home") { e.preventDefault(); goto(0); }
