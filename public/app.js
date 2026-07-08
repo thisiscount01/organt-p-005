@@ -577,12 +577,20 @@
     showQuestion();
 
     const ans = $("#intake-answer");
+    // IO의 "최초 자동포커스" 발화를 영구 무력화하는 플래그. 클릭→Escape처럼 사용자가
+    // 명시적으로 필드를 벗어나면(blur) true로 굳는다 — IO 콜백은 비동기(레이아웃 이후)라
+    // 클릭이 유발한 auto-scroll이 그 IO를 "최초로" 임계값 넘기며 늦게 트리거할 수 있는데,
+    // 이 늦은 첫 발화가 blur 이후 도착해도 이 플래그로 focusIntake()를 걸러 강제 재포커스를
+    // 막는다(코다 CTA·#intake 해시 등 "명시적" focusIntake() 호출은 이 플래그와 무관 —
+    // 무력화 대상은 IO의 수동적 자동발화뿐).
+    let intakeAutoDismissed = false;
     ans.addEventListener("keydown", (e) => {
       if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); submitAnswer(); }
     });
-    // Escape(→blur) 등 어떤 경로로든 필드를 벗어나면 예약된 지연 포커스도 함께 무효화 —
-    // 안 그러면 "일시적으로만" blur되고 타이머가 나중에 포커스를 되돌린다(PM 실측 회귀).
-    ans.addEventListener("blur", cancelIntakeFocus);
+    // Escape(→blur) 등 어떤 경로로든 필드를 벗어나면 예약된 지연 포커스도 함께 무효화하고,
+    // 이후 IO의 최초발화도 영구 차단 — 안 그러면 "일시적으로만" blur되고 타이머(또는 늦게
+    // 도착한 IO 최초발화)가 나중에 포커스를 되돌린다(PM 실측 회귀 + 그 트리거경위 변주).
+    ans.addEventListener("blur", () => { cancelIntakeFocus(); intakeAutoDismissed = true; });
     $("#intake-submit").addEventListener("click", submitAnswer);
     $("#intake-skip").addEventListener("click", () => { advanceQuestion(); ans.focus(); });
 
@@ -594,9 +602,12 @@
     let focused = false;
     new IntersectionObserver((es, ob) => {
       es.forEach((e) => {
-        if (e.isIntersecting && !focused && intake.autofocusFirst) {
-          focused = true; focusIntake(); ob.disconnect();
-        }
+        if (!e.isIntersecting || focused) return;
+        // "최초 교차"는 발화 즉시 소진(disconnect) — dismissed 상태라도 다시 관찰할 필요
+        // 없음(그 뒤 어떤 교차에도 자동포커스는 영구히 재발화하지 않아야 하므로).
+        focused = true;
+        ob.disconnect();
+        if (!intakeAutoDismissed && intake.autofocusFirst) focusIntake();
       });
     }, { threshold: 0.45 }).observe($("#intake"));
 
