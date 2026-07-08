@@ -587,6 +587,10 @@
     $("#intake-skip").addEventListener("click", () => { advanceQuestion(); ans.focus(); });
 
     // 인테이크가 처음 화면에 들어오면 커서 자동(autofocus) — 상단 진입은 방해 안 함
+    // threshold: #intake 섹션 실측높이(~1410px)가 커서 0.55는 1280x720(최대 가시비율
+    // 0.5106)·1366x768(0.5446) 등 흔한 데스크톱에서 수학적으로 절대 못 넘어 "스크롤완주
+    // autofocus" 경로가 영구 미발화했다(QA 실측, T-112204-1 REPORTS.md). 0.45로 낮춰
+    // 두 해상도 모두 실측 최대비율을 넘도록 함(섹션 높이/레이아웃은 디자인 소유라 안 건드림).
     let focused = false;
     new IntersectionObserver((es, ob) => {
       es.forEach((e) => {
@@ -594,7 +598,7 @@
           focused = true; focusIntake(); ob.disconnect();
         }
       });
-    }, { threshold: 0.55 }).observe($("#intake"));
+    }, { threshold: 0.45 }).observe($("#intake"));
 
     // 드롭존
     const dz = $("#dropzone");

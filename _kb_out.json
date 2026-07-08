@@ -1,0 +1,105 @@
+{
+  "bootError": null,
+  "keydownHandlerCount": 1,
+  "REQ1_focused_intake_never_intercepted": {
+    "1": {
+      "preventDefaultCalled": false,
+      "navigatedSomeStop": false
+    },
+    "2": {
+      "preventDefaultCalled": false,
+      "navigatedSomeStop": false
+    },
+    "3": {
+      "preventDefaultCalled": false,
+      "navigatedSomeStop": false
+    },
+    "4": {
+      "preventDefaultCalled": false,
+      "navigatedSomeStop": false
+    },
+    "j": {
+      "preventDefaultCalled": false,
+      "navigatedSomeStop": false
+    },
+    "k": {
+      "preventDefaultCalled": false,
+      "navigatedSomeStop": false
+    },
+    "ArrowDown": {
+      "preventDefaultCalled": false,
+      "navigatedSomeStop": false
+    },
+    "ArrowUp": {
+      "preventDefaultCalled": false,
+      "navigatedSomeStop": false
+    },
+    "Home": {
+      "preventDefaultCalled": false,
+      "navigatedSomeStop": false
+    },
+    "End": {
+      "preventDefaultCalled": false,
+      "navigatedSomeStop": false
+    },
+    "PageDown": {
+      "preventDefaultCalled": false,
+      "navigatedSomeStop": false
+    },
+    "PageUp": {
+      "preventDefaultCalled": false,
+      "navigatedSomeStop": false
+    }
+  },
+  "REQ2_unfocused_depthjump_intercepts": {
+    "1": {
+      "preventDefaultCalled": true,
+      "movedStops": [
+        "#coda"
+      ]
+    },
+    "2": {
+      "preventDefaultCalled": true,
+      "movedStops": [
+        "#intake"
+      ]
+    },
+    "j": {
+      "preventDefaultCalled": true,
+      "movedStops": [
+        "#intake"
+      ]
+    },
+    "k": {
+      "preventDefaultCalled": true,
+      "movedStops": [
+        "#coda"
+      ]
+    },
+    "Home": {
+      "preventDefaultCalled": true,
+      "movedStops": [
+        "#coda"
+      ]
+    },
+    "End": {
+      "preventDefaultCalled": true,
+      "movedStops": [
+        "#intake"
+      ]
+    }
+  },
+  "escape_blurs_intake": {
+    "preventDefaultCalled": true,
+    "blurCallCount": 1
+  },
+  "autofocus_IO_threshold": 0.45,
+  "control_noCancel_autofocus_fires_after_wait": {
+    "focusCalls": 1
+  },
+  "PM_chain_click_escape_wait_then_depthjump": {
+    "focusCallsBeforeJKey": 0,
+    "jKey_preventDefaultCalled": true,
+    "jKey_navigated": true
+  }
+}
