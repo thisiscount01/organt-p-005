@@ -254,6 +254,9 @@
     function goto(i) {
       const t = stops[Math.max(0, Math.min(stops.length - 1, i))];
       if (!t) return;
+      // 예약된 인테이크 지연 포커스가 있으면 취소 — 없으면 이 명시적 이동 뒤에도
+      // 나중에 발동해 포커스를 인테이크로 강제로 되돌리는 회귀가 생긴다.
+      cancelIntakeFocus();
       t.scrollIntoView({ behavior: REDUCED.matches ? "auto" : "smooth", block: "start" });
       if (t.hasAttribute("tabindex")) {
         try { t.focus({ preventScroll: true }); } catch (_) { t.focus(); }
@@ -321,10 +324,22 @@
 
   /* ── 인테이크(딥다이브 환경) ─────────────────────────────────────────── */
   let intakeState = { questions: [], qIndex: 0, done: false, entries: [] };
+  // focusIntake()의 지연 setTimeout 핸들 — 미저장 시 blur/다른 곳으로의 이동 이후에도
+  // 타이머가 나중에 무조건 발동해 포커스를 강제로 되돌리는 회귀가 생긴다(PM 실측).
+  let intakeFocusTimer = null;
+
+  function cancelIntakeFocus() {
+    if (intakeFocusTimer) { clearTimeout(intakeFocusTimer); intakeFocusTimer = null; }
+  }
 
   function focusIntake() {
     const ans = $("#intake-answer");
-    if (ans) setTimeout(() => { try { ans.focus({ preventScroll: true }); } catch (_) { ans.focus(); } }, REDUCED.matches ? 0 : 420);
+    if (!ans) return;
+    cancelIntakeFocus();
+    intakeFocusTimer = setTimeout(() => {
+      intakeFocusTimer = null;
+      try { ans.focus({ preventScroll: true }); } catch (_) { ans.focus(); }
+    }, REDUCED.matches ? 0 : 420);
   }
 
   function renderProgressDots() {
@@ -565,6 +580,9 @@
     ans.addEventListener("keydown", (e) => {
       if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); submitAnswer(); }
     });
+    // Escape(→blur) 등 어떤 경로로든 필드를 벗어나면 예약된 지연 포커스도 함께 무효화 —
+    // 안 그러면 "일시적으로만" blur되고 타이머가 나중에 포커스를 되돌린다(PM 실측 회귀).
+    ans.addEventListener("blur", cancelIntakeFocus);
     $("#intake-submit").addEventListener("click", submitAnswer);
     $("#intake-skip").addEventListener("click", () => { advanceQuestion(); ans.focus(); });
 
