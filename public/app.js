@@ -244,16 +244,6 @@
     const tag = (t.tagName || "").toLowerCase();
     return tag === "textarea" || tag === "input" || tag === "select" || t.isContentEditable === true;
   }
-  // "필드가 비었나"만으로는 depth-jump 여부를 못 가른다 — 스크롤완주 autofocus로
-  // 빈 칸에 커서가 놓인 경우와, 사용자가 그 빈 칸을 직접 클릭해 타이핑을 시작하려는
-  // 경우가 둘 다 "비어있음"이라 구분이 안 된다. 그래서 판별축을
-  // "포커스가 어떻게 발생했나"로 바꾼다 — 아래 isEmptyTextField는 안전망으로만 쓴다
-  // (이미 내용이 있으면 제스처 여부와 무관하게 항상 타이핑 우선).
-  function isEmptyTextField(t) {
-    const tag = (t && t.tagName || "").toLowerCase();
-    if (tag === "textarea" || tag === "input") return (t.value || "").length === 0;
-    return false;
-  }
   function setupKeyboard(depthsRoot) {
     const stops = [
       ...$$(".depth-panel", depthsRoot),
@@ -278,20 +268,6 @@
       return idx;
     }
 
-    let pointerDownTarget = null;
-    const notePointerDown = (e) => { pointerDownTarget = e.target; };
-    document.addEventListener("pointerdown", notePointerDown, true);
-    document.addEventListener("touchstart", notePointerDown, true);
-    document.addEventListener("mousedown", notePointerDown, true);
-    const gestureFocused = new WeakSet();
-    document.addEventListener("focusin", (e) => {
-      const via = pointerDownTarget;
-      pointerDownTarget = null;
-      if (via && (via === e.target || (via.contains && via.contains(e.target)))) gestureFocused.add(e.target);
-      else gestureFocused.delete(e.target);
-    }, true);
-    document.addEventListener("focusout", (e) => { gestureFocused.delete(e.target); }, true);
-
     document.addEventListener("keydown", (e) => {
       if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
       if (e.key === "Escape" && isInteractive(e.target)) {
@@ -303,12 +279,11 @@
       }
       const inField = isInteractive(e.target);
       const k = e.key;
-      // 입력칸 안에서 실제로 타이핑 중(비어있지 않음)이면 depth-jump를 절대 가로채지
-      // 않는다 — j/k/숫자든 화살표든 편집을 방해하지 않는다(첫 글자 유실 방지).
-      // 입력칸이 "비어" 있으면(스크롤 완주 후 autofocus 직후처럼 아직 아무것도 안
-      // 쓴 상태) j/k/숫자/화살표 전부 depth-jump로 통과시킨다 — 지울 내용이 없어
-      // 안전하고, 그렇게 갇히는 포커스 트랩을 해소한다.
-      if (inField && (gestureFocused.has(e.target) || !isEmptyTextField(e.target))) return;
+      // 포커스가 인테이크(또는 다른 interactive 요소) 안에 있으면 — 발생 경위(클릭/
+      // Tab/autofocus)·내용 유무 불문 — j/k/숫자/화살표는 전부 타이핑으로만 흐른다.
+      // depth-jump는 포커스가 필드 밖에 있을 때만 동작한다. autofocus로 빈 칸에
+      // 갇힌 경우의 탈출구는 위 Escape→blur뿐(판별축이 아니라 별도 명시적 메커니즘).
+      if (inField) return;
       if (k === "ArrowDown" || k === "j" || k === "PageDown") { e.preventDefault(); goto(current() + 1); }
       else if (k === "ArrowUp" || k === "k" || k === "PageUp") { e.preventDefault(); goto(current() - 1); }
       else if (k === "Home") { e.preventDefault(); goto(0); }
